@@ -22,79 +22,87 @@
           <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
         </el-upload>
       </el-form-item>
-      <div>
-        <el-color-picker
-          v-model="ccfoliaLog.header_color1"
-          :predefine="predefineColors">
-        </el-color-picker>
-        <el-color-picker
-          v-model="ccfoliaLog.header_color2"
-          :predefine="predefineColors">
-        </el-color-picker>
-        <el-color-picker
-          v-model="ccfoliaLog.link_color"
-          :predefine="predefineColors">
-        </el-color-picker>
-        <el-input v-model="ccfoliaLog.title" class="mb-2"></el-input>
-        <div class="mb-3" :style="`background:linear-gradient(${ccfoliaLog.header_color1},${ccfoliaLog.header_color2});color:${ccfoliaLog.link_color}`">
-          <div class="p-2">{{ccfoliaLog.title}}</div>
-          <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
-        </div>
-      </div>
-      <div>
-        <div v-for="tab in ccfoliaLog.tabs" :key="tab.name">
+      <div v-show="ccfoliaLog.rows.length > 0">
+        <el-card shadow="never" class="mb-3">
+          <div slot="header" class="clearfix">
+            <span>ダイス結果</span>
+          </div>
+          <el-radio-group v-model="selectedDiceType" size="mini">
+            <el-radio-button v-for="dice in systems.find(x => x.key == ccfoliaLog.system).diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
+          </el-radio-group>
+          <el-checkbox-group v-model="selectedDiceTabs">
+            <el-checkbox label="メイン"></el-checkbox>
+            <el-checkbox label="情報"></el-checkbox>
+            <el-checkbox label="雑談"></el-checkbox>
+            <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
+          </el-checkbox-group>
+          <div v-for="(row, index) in diceRows" :key="index">
+            <div :style="`color:${row.color}`">
+              [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+            </div>
+          </div>
+        </el-card>
+        <el-card shadow="never" class="mb-3">
+          <div slot="header" class="clearfix">
+            <span>ヘッダー色設定</span>
+          </div>
           <el-color-picker
-            v-model="tab.line_color"
+            v-model="ccfoliaLog.header_color1"
             :predefine="predefineColors">
           </el-color-picker>
           <el-color-picker
-            v-model="tab.background_color"
+            v-model="ccfoliaLog.header_color2"
             :predefine="predefineColors">
           </el-color-picker>
-          <div class="mb-3" :style="`font-size:13px;background-color:${tab.background_color};border-left:solid 2px ${tab.line_color};`">
-            <div class="p-2">{{tab.name}}</div>
+          <el-color-picker
+            v-model="ccfoliaLog.link_color"
+            :predefine="predefineColors">
+          </el-color-picker>
+          <el-input v-model="ccfoliaLog.title" class="mb-2"></el-input>
+          <div class="mb-3" :style="`background:linear-gradient(${ccfoliaLog.header_color1},${ccfoliaLog.header_color2});color:${ccfoliaLog.link_color}`">
+            <div class="p-2">{{ccfoliaLog.title}}</div>
+            <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
           </div>
-        </div>
+        </el-card>
+        <el-card shadow="never" class="mb-3">
+          <div slot="header" class="clearfix">
+            <span>タブ色設定</span>
+          </div>
+          <div v-for="tab in ccfoliaLog.tabs" :key="tab.name">
+            <el-color-picker
+              v-model="tab.line_color"
+              :predefine="predefineColors">
+            </el-color-picker>
+            <el-color-picker
+              v-model="tab.background_color"
+              :predefine="predefineColors">
+            </el-color-picker>
+            <div class="mb-3" :style="`font-size:13px;background-color:${tab.background_color};border-left:solid 2px ${tab.line_color};`">
+              <div class="p-2">{{tab.name}}</div>
+            </div>
+          </div>
+        </el-card>
+        <el-card shadow="never" class="mb-3">
+          <div slot="header" class="clearfix">
+            <span>ログ全文</span>
+          </div>
+          <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
+            <div v-if="!row.is_divider" :style="`color:${row.color}`">
+              <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+            </div>
+            <div v-if="row.is_divider">
+              <el-row :gutter="5">
+                <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
+                <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
+                <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
+                <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
+              </el-row>
+            </div>
+          </div>
+        </el-card>
+  
+        <el-button @click="postCcfoliaLog">整形！</el-button>
       </div>
-      <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.rows.length > 0">
-        <div slot="header" class="clearfix">
-          <span>ダイス結果</span>
-        </div>
-        <el-radio-group v-model="selectedDiceType" size="mini">
-          <el-radio-button v-for="dice in systems.find(x => x.key == ccfoliaLog.system).diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
-        </el-radio-group>
-        <el-checkbox-group v-model="selectedDiceTabs">
-          <el-checkbox label="メイン"></el-checkbox>
-          <el-checkbox label="情報"></el-checkbox>
-          <el-checkbox label="雑談"></el-checkbox>
-          <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
-        </el-checkbox-group>
-        <div v-for="(row, index) in diceRows" :key="index">
-          <div :style="`color:${row.color}`">
-            [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
-          </div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.rows.length > 0">
-        <div slot="header" class="clearfix">
-          <span>ログ全文</span>
-        </div>
-        <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-          <div v-if="!row.is_divider" :style="`color:${row.color}`">
-            <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
-          </div>
-          <div v-if="row.is_divider">
-            <el-row :gutter="5">
-              <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
-              <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
-              <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
-              <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
-            </el-row>
-          </div>
-        </div>
-      </el-card>
-
-      <el-button @click="postCcfoliaLog">整形！</el-button>
     </el-form>
   </div>
 </template>
