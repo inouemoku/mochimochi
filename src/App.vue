@@ -1,8 +1,12 @@
 <template>
   <div id="app">
     <div class="container-fluid">
-      <h3 class="m-3">ココフォリアログ整形ツール</h3>
-      <div class="row">
+      <h3 class="my-3">MochiMochi - ココフォリアログ整形ツール</h3>
+      <small>
+        自分用に作ったログ整形ツールです。ココフォリアのログファイルを読み込ませて整形！ボタンを押すとダウンロードできます。<br>
+        おまけでダイス結果も見られます。
+      </small>
+      <div class="row mt-3">
         <div class="col-md-12">
           <ccfolia-formatter />
         </div>

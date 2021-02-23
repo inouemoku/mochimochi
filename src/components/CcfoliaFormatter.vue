@@ -25,7 +25,11 @@
       <div v-show="ccfoliaLog.rows.length > 0">
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
-            <span>ダイス結果</span>
+            <span>ダイス結果  <el-popover
+              trigger="hover"
+              content="ダイス結果がまとめて見られます。">
+              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
+            </el-popover></span>
           </div>
           <el-radio-group v-model="selectedDiceType" size="mini">
             <el-radio-button v-for="dice in systems.find(x => x.key == ccfoliaLog.system).diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
@@ -44,7 +48,11 @@
         </el-card>
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
-            <span>ヘッダー色設定</span>
+            <span>ヘッダー設定  <el-popover
+              trigger="hover"
+              content="ヘッダー色とタイトルの設定ができます。色は左と真ん中が背景色、右が文字色です。">
+              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
+            </el-popover></span>
           </div>
           <el-color-picker
             v-model="ccfoliaLog.header_color1"
@@ -64,9 +72,13 @@
             <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
           </div>
         </el-card>
-        <el-card shadow="never" class="mb-3">
+        <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.tabs.length > 0">
           <div slot="header" class="clearfix">
-            <span>タブ色設定</span>
+            <span>タブ色設定  <el-popover
+              trigger="hover"
+              content="雑談、情報以外のタブの色の設定ができます。左側がラインの色、右側が背景色です。">
+              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
+            </el-popover></span>
           </div>
           <div v-for="tab in ccfoliaLog.tabs" :key="tab.name">
             <el-color-picker
@@ -82,9 +94,13 @@
             </div>
           </div>
         </el-card>
-        <el-card shadow="never" class="mb-3">
+        <el-card shadow="never" class="mb-4" :body-style="{height:'500px', 'overflow-y':'scroll'}">
           <div slot="header" class="clearfix">
-            <span>ログ全文</span>
+            <span>ログ全文  <el-popover
+              trigger="hover"
+              content="+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。">
+              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
+            </el-popover></span>
           </div>
           <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
             <div v-if="!row.is_divider" :style="`color:${row.color}`">
@@ -100,10 +116,19 @@
             </div>
           </div>
         </el-card>
-  
-        <el-button @click="postCcfoliaLog">整形！</el-button>
       </div>
+        <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
     </el-form>
+    <el-divider></el-divider>
+    <small>
+      <div>最終更新: 2021-02-23 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
+    </small>
+    <el-drawer title="履歴" :visible.sync="drawer">
+      <ul style="font-size:0.9em;">
+        <li>2021-02-23 公開</li>
+      </ul>
+    </el-drawer>
   </div>
 </template>
 
@@ -142,6 +167,7 @@
         ],
         selectedDiceType: '',
         selectedDiceTabs: ['メイン'],
+        drawer: false,
       }
     },
     props: {
