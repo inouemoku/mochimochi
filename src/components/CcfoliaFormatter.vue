@@ -27,7 +27,7 @@
           <div slot="header" class="clearfix">
             <span>ダイス結果  <el-popover
               trigger="hover"
-              content="ダイス結果がまとめて見られます。">
+              content="ダイス結果だけまとめて見られます。">
               <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
             </el-popover></span>
           </div>
