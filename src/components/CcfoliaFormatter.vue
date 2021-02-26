@@ -4,10 +4,10 @@
       <el-form-item prop="system">
         <el-select v-model="ccfoliaLog.system">
           <el-option
-            v-for="system in systems"
-            :key="system.key"
-            :label="system.name"
-            :value="system.key">
+            v-for="s in systems"
+            :key="s.key"
+            :label="s.name"
+            :value="s.key">
           </el-option>
         </el-select>
       </el-form-item>
@@ -32,7 +32,7 @@
             </el-popover></span>
           </div>
           <el-radio-group v-model="selectedDiceType" size="mini">
-            <el-radio-button v-for="dice in systems.find(x => x.key == ccfoliaLog.system).diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
+            <el-radio-button v-for="dice in system.diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
           </el-radio-group>
           <el-checkbox-group v-model="selectedDiceTabs">
             <el-checkbox label="メイン"></el-checkbox>
@@ -121,12 +121,13 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-02-23 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-02-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
         <li>2021-02-23 公開</li>
+        <li>2021-02-27 一行のダイス結果表記に対応</li>
       </ul>
     </el-drawer>
   </div>
@@ -153,7 +154,7 @@
           '#c71585',
         ],
         systems: [
-          { key: 'coc6', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
+          { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
             diceTypes: [
               { key: 'critical', name: '決定的成功', class: 'success' },
               { key: 'famble', name: '致命的失敗', class: 'failed' },
@@ -161,10 +162,12 @@
               { key: 'success', name: '成功', class: 'success' },
               { key: 'partial', name: '部分的成功', class: 'success' },
               { key: 'failed', name: '失敗', class: 'failed' },
+              { key: 'failure', name: '故障', class: 'failed' },
             ]
           },
           // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
         ],
+        system: {},
         selectedDiceType: '',
         selectedDiceTabs: ['メイン'],
         drawer: false,
@@ -189,6 +192,9 @@
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
         this.ccfoliaLog.file = file;
+        this.system = this.systems.find(x => x.key == this.ccfoliaLog.system);
+        const title = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1').replace(/^(.*)\[all\]$/, '$1');
+        this.ccfoliaLog.title = `${this.system.prefix}${title}`
         this.analyzeHtml();
       },
       // ダウンロードリンクを作成しファイルをダウンロードする
@@ -227,12 +233,14 @@
           }
           const ptags = doc.getElementsByTagName('p')
           self.ccfoliaLog.rows = Array.prototype.slice.call(ptags).map((p) => {
+            const { isOneline, diceType } = self.diceType(p.children[2].innerHTML);
             const row = {
               color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
               tab_name: p.children[0].innerText.replace(/^ \[(.*)\]/, '$1'),
               name: p.children[1].innerText,
               body: p.children[2].innerHTML,
-              dice_type: self.diceType(p.children[2].innerHTML),
+              dice_type: diceType,
+              is_oneline: isOneline,
             };
             return LogRow.fromObject(row);
           });
@@ -250,14 +258,20 @@
           self.ccfoliaLog.tabs = tabs;
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
-        this.selectedDiceType = this.systems.find(x => x.key == this.ccfoliaLog.system).diceTypes[0].key;
+        this.selectedDiceType = this.system.diceTypes[0].key;
       },
       diceType(body) {
-        const system = this.systems.find(x => x.key == this.ccfoliaLog.system);
-        const reg = new RegExp(`.*${system.diceText} :.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
+        const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
+        if(isOneline) {
+          const regO = new RegExp(`.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
+          const rowO = body.match(regO);
+          if(rowO) return {isOneline: true, diceType: this.system.diceTypes.find(d => d.name == rowO[1])};
+          return { isOneline: true, diceType: null };
+        }
+        const reg = new RegExp(`.*${this.system.diceText} :.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
         const row = body.match(reg);
-        if(!row) return null;
-        return system.diceTypes.find(d => d.name == row[1])
+        if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1])};
+        return { isOneline: false, diceType: null }
       },
     },
     computed: {
