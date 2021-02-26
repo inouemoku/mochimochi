@@ -11,6 +11,7 @@ export default class LogRow {
     this._body       = this.paramFromObject(log_row, 'body');
     this._is_divider = this.paramFromObject(log_row, 'is_divider');
     this._dice_type  = this.paramFromObject(log_row, 'dice_type');
+    this._is_oneline = this.paramFromObject(log_row, 'is_oneline');
   }
 
   paramFromObject(log_row, param, initValue = null) {
@@ -24,11 +25,16 @@ export default class LogRow {
 `
     }
       const diceText = this.dice_type ? this.dice_type.class : '';
-      const bobo = this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
+      let body = '';
+      if(this.is_oneline) {
+        body = this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
+      } else {
+        body = this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
+      }
       return `
       <div class="${this.class_name(tabs)}" style="color:${this.color};">
         <span class="name-field"><span class="name"><span>${this.name}</span> :</span></span>
-        <span class="text">${bobo}</span>
+        <span class="text">${body}</span>
       </div>
 `
   }
@@ -105,4 +111,12 @@ export default class LogRow {
   get dice_type() { return this._dice_type; }
 
   set dice_type(value) { this._dice_type = value; }
+
+  /**
+   * ダイス結果が一行か
+   * @returns {boolean}
+   */
+  get is_oneline() { return this._is_oneline; }
+
+  set is_oneline(value) { this._is_oneline = value; }
 }
