@@ -31,8 +31,8 @@
               <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
             </el-popover></span>
           </div>
-          <el-radio-group v-model="selectedDiceType" size="mini">
-            <el-radio-button v-for="dice in system.diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
+          <el-radio-group v-model="selectedDiceResult" size="mini">
+            <el-radio-button v-for="r in system.diceResults" :key="r.key" :label="r.key">{{ r.name }}</el-radio-button>
           </el-radio-group>
           <el-checkbox-group v-model="selectedDiceTabs">
             <el-checkbox label="メイン"></el-checkbox>
@@ -155,20 +155,27 @@
         ],
         systems: [
           { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
+            diceResults: [
+              { key: 'critical', name: '決定的成功' },
+              { key: 'famble', name: '致命的失敗' },
+              { key: 'special', name: 'スペシャル' },
+              { key: 'success', name: '成功' },
+              { key: 'failed', name: '失敗' }
+            ],
             diceTypes: [
-              { key: 'critical', name: '決定的成功', class: 'success' },
-              { key: 'famble', name: '致命的失敗', class: 'failed' },
-              { key: 'special', name: 'スペシャル', class: 'success' },
-              { key: 'success', name: '成功', class: 'success' },
-              { key: 'partial', name: '部分的成功', class: 'success' },
-              { key: 'failed', name: '失敗', class: 'failed' },
-              { key: 'failure', name: '故障', class: 'failed' },
+              { resultKey: 'critical', name: '決定的成功', class: 'success' },
+              { resultKey: 'famble', name: '致命的失敗', class: 'failed' },
+              { resultKey: 'special', name: 'スペシャル', class: 'success' },
+              { resultKey: 'success', name: '成功', class: 'success' },
+              { resultKey: 'success', name: '部分的成功', class: 'success' },
+              { resultKey: 'failed', name: '失敗', class: 'failed' },
+              { resultKey: 'failed', name: '故障', class: 'failed' },
             ]
           },
           // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
         ],
         system: {},
-        selectedDiceType: '',
+        selectedDiceResult: '',
         selectedDiceTabs: ['メイン'],
         drawer: false,
       }
@@ -258,7 +265,7 @@
           self.ccfoliaLog.tabs = tabs;
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
-        this.selectedDiceType = this.system.diceTypes[0].key;
+        this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
       diceType(body) {
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
@@ -279,8 +286,8 @@
         return this.ccfoliaLog.rows.filter(x => x.is_divider);
       },
       diceRows: function() {
-        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.key == this.selectedDiceType && this.selectedDiceTabs.includes(x.tab_name));
-      }
+        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name));
+      },
     }
   };
 </script>
