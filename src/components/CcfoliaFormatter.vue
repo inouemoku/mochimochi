@@ -102,44 +102,49 @@
               <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
             </el-popover></span>
           </div>
-          <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-            <div v-if="!row.is_divider" :style="`color:${row.color}`">
-              <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+          <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
+            <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
+              <div v-if="!row.is_divider" :style="`color:${row.color}`" class="draggable">
+                <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+              </div>
+              <div v-if="row.is_divider">
+                <el-row :gutter="5">
+                  <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
+                  <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
+                  <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
+                  <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
+                </el-row>
+              </div>
             </div>
-            <div v-if="row.is_divider">
-              <el-row :gutter="5">
-                <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
-                <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
-                <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
-                <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
-              </el-row>
-            </div>
-          </div>
+          </draggable>
         </el-card>
       </div>
         <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-02-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-03-13 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
         <li>2021-02-23 公開</li>
         <li>2021-02-27 一行のダイス結果表記に対応</li>
+        <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
       </ul>
     </el-drawer>
   </div>
 </template>
 
 <script>
+  import draggable from 'vuedraggable'
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
   
   export default {
     name: "CcfoliaFormatter",
     components: {
+      draggable
     },
     data() {
       return {
@@ -291,3 +296,23 @@
     }
   };
 </script>
+
+<style>
+.draggable:hover {
+  cursor:-moz-grab;
+  cursor:-webkit-grab;
+  cursor: grab;
+}
+.draggable:active {
+  cursor:-moz-grabbing;
+  cursor:-webkit-grabbing;
+  cursor: grabbing;
+}
+.sortable-chosen {
+            opacity: 0.7;
+            background-color:#dcdcdc;
+        }
+        .sortable-ghost {
+            background-color:#dcdcdc;
+        }
+</style>
