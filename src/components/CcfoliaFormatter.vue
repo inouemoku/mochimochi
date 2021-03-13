@@ -25,11 +25,11 @@
       <div v-show="ccfoliaLog.rows.length > 0">
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
-            <span>ダイス結果  <el-popover
-              trigger="hover"
+            <span>ダイス結果  <el-tooltip
+              effect="dark"  placement="top-start"
               content="ダイス結果だけまとめて見られます。">
-              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
-            </el-popover></span>
+              <el-button icon="el-icon-question" type="text"></el-button>
+            </el-tooltip></span>
           </div>
           <el-radio-group v-model="selectedDiceResult" size="mini">
             <el-radio-button v-for="r in system.diceResults" :key="r.key" :label="r.key">{{ r.name }}</el-radio-button>
@@ -48,11 +48,11 @@
         </el-card>
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
-            <span>ヘッダー設定  <el-popover
-              trigger="hover"
-              content="ヘッダー色とタイトルの設定ができます。色は左と真ん中が背景色、右が文字色です。">
-              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
-            </el-popover></span>
+            <span>ヘッダー設定  <el-tooltip
+              effect="dark"  placement="top-start">
+              <div slot="content">ヘッダー色とタイトルの設定ができます。<br/>色は左と真ん中が背景色、右が文字色です。</div>
+              <el-button icon="el-icon-question" type="text"></el-button>
+            </el-tooltip></span>
           </div>
           <el-color-picker
             v-model="ccfoliaLog.header_color1"
@@ -74,11 +74,11 @@
         </el-card>
         <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.tabs.length > 0">
           <div slot="header" class="clearfix">
-            <span>タブ色設定  <el-popover
-              trigger="hover"
-              content="雑談、情報以外のタブの色の設定ができます。左側がラインの色、右側が背景色です。">
-              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
-            </el-popover></span>
+            <span>タブ色設定  <el-tooltip
+              effect="dark"  placement="top-start">
+              <div slot="content">雑談、情報以外のタブの色の設定ができます。<br/>左側がラインの色、右側が背景色です。</div>
+              <el-button icon="el-icon-question" type="text"></el-button>
+            </el-tooltip></span>
           </div>
           <div v-for="tab in ccfoliaLog.tabs" :key="tab.name">
             <el-color-picker
@@ -96,11 +96,12 @@
         </el-card>
         <el-card shadow="never" class="mb-4" :body-style="{height:'500px', 'overflow-y':'scroll'}">
           <div slot="header" class="clearfix">
-            <span>ログ全文  <el-popover
-              trigger="hover"
-              content="+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。">
-              <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
-            </el-popover></span>
+            <span>ログ全文  <el-tooltip
+              effect="dark"  placement="top-start">
+              <el-button icon="el-icon-question" type="text"></el-button>
+              <div slot="content">+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。<br/>行ごと掴んで順序を入れ替えることができます。</div>
+            </el-tooltip>
+            </span>
           </div>
           <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
