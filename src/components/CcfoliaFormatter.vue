@@ -31,8 +31,8 @@
               <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
             </el-popover></span>
           </div>
-          <el-radio-group v-model="selectedDiceType" size="mini">
-            <el-radio-button v-for="dice in system.diceTypes" :key="dice.key" :label="dice.key">{{ dice.name }}</el-radio-button>
+          <el-radio-group v-model="selectedDiceResult" size="mini">
+            <el-radio-button v-for="r in system.diceResults" :key="r.key" :label="r.key">{{ r.name }}</el-radio-button>
           </el-radio-group>
           <el-checkbox-group v-model="selectedDiceTabs">
             <el-checkbox label="メイン"></el-checkbox>
@@ -102,44 +102,49 @@
               <el-button slot="reference" icon="el-icon-question" type="text"></el-button>
             </el-popover></span>
           </div>
-          <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-            <div v-if="!row.is_divider" :style="`color:${row.color}`">
-              <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+          <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
+            <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
+              <div v-if="!row.is_divider" :style="`color:${row.color}`" class="draggable">
+                <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+              </div>
+              <div v-if="row.is_divider">
+                <el-row :gutter="5">
+                  <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
+                  <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
+                  <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
+                  <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
+                </el-row>
+              </div>
             </div>
-            <div v-if="row.is_divider">
-              <el-row :gutter="5">
-                <el-col :span="1"><el-button size="mini" @click="addRow(index)">+</el-button></el-col>
-                <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
-                <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
-                <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
-              </el-row>
-            </div>
-          </div>
+          </draggable>
         </el-card>
       </div>
         <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-02-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-03-13 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
         <li>2021-02-23 公開</li>
         <li>2021-02-27 一行のダイス結果表記に対応</li>
+        <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
       </ul>
     </el-drawer>
   </div>
 </template>
 
 <script>
+  import draggable from 'vuedraggable'
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
   
   export default {
     name: "CcfoliaFormatter",
     components: {
+      draggable
     },
     data() {
       return {
@@ -155,20 +160,27 @@
         ],
         systems: [
           { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
+            diceResults: [
+              { key: 'critical', name: '決定的成功' },
+              { key: 'famble', name: '致命的失敗' },
+              { key: 'special', name: 'スペシャル' },
+              { key: 'success', name: '成功' },
+              { key: 'failed', name: '失敗' }
+            ],
             diceTypes: [
-              { key: 'critical', name: '決定的成功', class: 'success' },
-              { key: 'famble', name: '致命的失敗', class: 'failed' },
-              { key: 'special', name: 'スペシャル', class: 'success' },
-              { key: 'success', name: '成功', class: 'success' },
-              { key: 'partial', name: '部分的成功', class: 'success' },
-              { key: 'failed', name: '失敗', class: 'failed' },
-              { key: 'failure', name: '故障', class: 'failed' },
+              { resultKey: 'critical', name: '決定的成功', class: 'success' },
+              { resultKey: 'famble', name: '致命的失敗', class: 'failed' },
+              { resultKey: 'special', name: 'スペシャル', class: 'success' },
+              { resultKey: 'success', name: '成功', class: 'success' },
+              { resultKey: 'success', name: '部分的成功', class: 'success' },
+              { resultKey: 'failed', name: '失敗', class: 'failed' },
+              { resultKey: 'failed', name: '故障', class: 'failed' },
             ]
           },
           // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
         ],
         system: {},
-        selectedDiceType: '',
+        selectedDiceResult: '',
         selectedDiceTabs: ['メイン'],
         drawer: false,
       }
@@ -258,7 +270,7 @@
           self.ccfoliaLog.tabs = tabs;
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
-        this.selectedDiceType = this.system.diceTypes[0].key;
+        this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
       diceType(body) {
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
@@ -279,8 +291,28 @@
         return this.ccfoliaLog.rows.filter(x => x.is_divider);
       },
       diceRows: function() {
-        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.key == this.selectedDiceType && this.selectedDiceTabs.includes(x.tab_name));
-      }
+        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name));
+      },
     }
   };
 </script>
+
+<style>
+.draggable:hover {
+  cursor:-moz-grab;
+  cursor:-webkit-grab;
+  cursor: grab;
+}
+.draggable:active {
+  cursor:-moz-grabbing;
+  cursor:-webkit-grabbing;
+  cursor: grabbing;
+}
+.sortable-chosen {
+            opacity: 0.7;
+            background-color:#dcdcdc;
+        }
+        .sortable-ghost {
+            background-color:#dcdcdc;
+        }
+</style>
