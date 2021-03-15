@@ -109,7 +109,7 @@ export default class CcfoliaLog {
 
   format() {
     const dividers = this.rows.filter(x => x.is_divider);
-    const menu_array = dividers.map((x,k) => `      <a href="#key${k}">${x.name}</a>`).join("\n");
+    const menu_array = dividers.map((x) => `      <a href="#key${x.key}">${x.name}</a>`).join("\n");
     let tab_styles = '';
     if(this.tabs) {
       tab_styles = this.tabs.reduce((result, tab, index) => {

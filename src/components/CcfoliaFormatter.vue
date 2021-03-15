@@ -124,7 +124,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-03-13 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-03-15 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -132,6 +132,7 @@
         <li>2021-02-23 公開</li>
         <li>2021-02-27 一行のダイス結果表記に対応</li>
         <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
+        <li>2021-03-15 リンクが効かない不具合の修正</li>
       </ul>
     </el-drawer>
   </div>
@@ -191,7 +192,7 @@
     methods: {
       // 行を追加
       addRow(index) {
-        this.ccfoliaLog.rows.splice(index, 0, LogRow.fromObject({ is_divider: true, name: '', body: '' }));
+        this.ccfoliaLog.rows.splice(index, 0, LogRow.fromObject({ is_divider: true, name: '', body: '', key: this.dividerRows.length }));
       },
       // 行を削除
       removeRow(index) {
@@ -259,6 +260,7 @@
           });
           const uniqTabs = [...new Set(self.ccfoliaLog.rows.map(x => x.tab_name))];
           const dayLine = LogRow.fromObject({
+            key: 0,
             is_divider: true,
             name: '1',
             body: '1日目',
