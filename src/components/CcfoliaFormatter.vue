@@ -23,7 +23,7 @@
         </el-upload>
       </el-form-item>
       <div v-show="ccfoliaLog.rows.length > 0">
-        <el-card shadow="never" class="mb-3">
+        <el-card shadow="never" class="mb-3" v-if="ccfoliaLog.system != 'other'">
           <div slot="header" class="clearfix">
             <span>ダイス結果  <el-tooltip
               effect="dark"  placement="top-start"
@@ -124,7 +124,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-03-15 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-03-29 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -133,6 +133,7 @@
         <li>2021-02-27 一行のダイス結果表記に対応</li>
         <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
         <li>2021-03-15 リンクが効かない不具合の修正</li>
+        <li>2021-03-29 エモクロアTRPGに対応</li>
       </ul>
     </el-drawer>
   </div>
@@ -180,6 +181,27 @@
             ]
           },
           // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
+          { key: 'emoklore', prefix: '【エモクロア】', name: 'エモクロアTRPG', diceText: 'Emoklore',
+            diceResults: [
+              { key: 'catastrophe', name: 'カタストロフ' },
+              { key: 'miracle', name: 'ミラクル' },
+              { key: 'triple', name: 'トリプル' },
+              { key: 'double', name: 'ダブル' },
+              { key: 'success', name: 'シングル' },
+              { key: 'failed', name: '失敗' },
+              { key: 'famble', name: 'ファンブル' }
+            ],
+            diceTypes: [
+              { resultKey: 'catastrophe', name: 'カタストロフ!', class: 'success'  },
+              { resultKey: 'miracle', name: 'ミラクル!', class: 'success'  },
+              { resultKey: 'triple', name: 'トリプル!', class: 'success'  },
+              { resultKey: 'double', name: 'ダブル!', class: 'success'  },
+              { resultKey: 'success', name: '成功!', class: 'success'  },
+              { resultKey: 'failed', name: '失敗!', class: 'failed' },
+              { resultKey: 'famble', name: 'ファンブル!', class: 'failed' }
+            ]
+          },
+          { key: 'other', prefix: '', name: 'その他', diceText: '', diceResults: [], diceTypes: []}
         ],
         system: {},
         selectedDiceResult: '',
@@ -273,7 +295,7 @@
           self.ccfoliaLog.tabs = tabs;
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
-        this.selectedDiceResult = this.system.diceTypes[0].resultKey;
+        if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
       diceType(body) {
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
