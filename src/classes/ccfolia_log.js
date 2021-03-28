@@ -139,7 +139,7 @@ ${menu_array}
   </header>
   <body>
     <div class="main">
-${this.rows.map(x => x.format(this.tabs)).join("\n")}
+${this.rows.map(x => x.format(this.system, this.tabs)).join("\n")}
     </div>
   </body>
 </html>

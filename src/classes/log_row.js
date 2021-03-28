@@ -18,20 +18,30 @@ export default class LogRow {
     return (log_row == null || log_row[param] == null) ? initValue : log_row[param]
   }
 
-  format(tabs) {
+  format(system, tabs) {
     if(this.is_divider) {
       return `
     <h2 id="key${this.key}" class="day">${this.body}</h2><hr class="day-line">
 `
     }
-      const diceText = this.dice_type ? this.dice_type.class : '';
-      let body = '';
+    const diceText = this.dice_type ? this.dice_type.class : '';
+    let body = this.body;
+    if(system == "coc6") {
       if(this.is_oneline) {
         body = this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
       } else {
         body = this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
       }
-      return `
+    }
+    if(system == "emoklore") {
+      const dareq = /(.*)\((.*)\) ＞ \((.*)\) ＞ (.*)/;
+      if(dareq.test(this.body)) {
+        body = this.body.replace(dareq, `$1<br>\n<span class="dice ${diceText}">($2) ＞ ($3) ＞ $4</span>`);
+      } else {
+        body = this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
+      }
+    }
+    return `
       <div class="${this.class_name(tabs)}" style="color:${this.color};">
         <span class="name-field"><span class="name"><span>${this.name}</span> :</span></span>
         <span class="text">${body}</span>
