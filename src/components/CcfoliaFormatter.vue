@@ -40,6 +40,10 @@
             <el-checkbox label="雑談"></el-checkbox>
             <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
           </el-checkbox-group>
+          <el-checkbox-group v-model="selectedNameTabs">
+            <el-checkbox v-for="(aname, index) in names" :key="index" :label="aname"></el-checkbox>
+          </el-checkbox-group>
+          <small>計</small> {{diceRows.length}} <small>回</small>
           <div v-for="(row, index) in diceRows" :key="index">
             <div :style="`color:${row.color}`">
               [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
@@ -94,7 +98,7 @@
             </div>
           </div>
         </el-card>
-        <el-card shadow="never" class="mb-4" :body-style="{height:'500px', 'overflow-y':'scroll'}">
+        <el-card shadow="never" class="mb-4" :body-style="{height:'95vh', 'overflow-y':'scroll'}">
           <div slot="header" class="clearfix">
             <span>ログ全文  <el-tooltip
               effect="dark"  placement="top-start">
@@ -124,7 +128,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-03-29 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-06-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -134,6 +138,7 @@
         <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
         <li>2021-03-15 リンクが効かない不具合の修正</li>
         <li>2021-03-29 エモクロアTRPGに対応</li>
+        <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -206,6 +211,8 @@
         system: {},
         selectedDiceResult: '',
         selectedDiceTabs: ['メイン'],
+        selectedNameTabs: [],
+        names: [],
         drawer: false,
       }
     },
@@ -280,6 +287,8 @@
             };
             return LogRow.fromObject(row);
           });
+          self.names = [...new Set(self.ccfoliaLog.rows.filter(x => x.dice_type != null).map(x => x.name))];
+          self.selectedNameTabs = self.names;
           const uniqTabs = [...new Set(self.ccfoliaLog.rows.map(x => x.tab_name))];
           const dayLine = LogRow.fromObject({
             key: 0,
@@ -316,7 +325,7 @@
         return this.ccfoliaLog.rows.filter(x => x.is_divider);
       },
       diceRows: function() {
-        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name));
+        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name) && this.selectedNameTabs.includes(x.name));
       },
     }
   };
