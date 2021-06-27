@@ -109,7 +109,7 @@
           </div>
           <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-              <div v-if="!row.is_divider" :style="`color:${row.color}`" class="draggable">
+              <div v-if="!row.is_divider" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable">
                 <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
               </div>
               <div v-if="row.is_divider">
@@ -128,7 +128,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-06-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-06-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -139,6 +139,7 @@
         <li>2021-03-15 リンクが効かない不具合の修正</li>
         <li>2021-03-29 エモクロアTRPGに対応</li>
         <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
+        <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -318,6 +319,12 @@
         const row = body.match(reg);
         if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1])};
         return { isOneline: false, diceType: null }
+      },
+      backgroundColor(tabName) {
+        if(tabName == "メイン") return "#ffffff";
+        if(tabName == "雑談") return "#f7f7f7";
+        if(tabName == "情報") return "#fafafa";
+        return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
       },
     },
     computed: {
