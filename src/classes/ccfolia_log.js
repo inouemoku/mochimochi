@@ -166,7 +166,7 @@ ${this.rows.map(x => x.format(this.system, this.tabs)).join("\n")}
   }
   h1 {
     font-size: 18px;
-    color:#fff;
+    color:${this.link_color};
     font-weight:normal
   }
   h2 {

@@ -128,7 +128,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-06-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2021-09-14 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -140,6 +140,7 @@
         <li>2021-03-29 エモクロアTRPGに対応</li>
         <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
         <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
+        <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
       </ul>
     </el-drawer>
   </div>
