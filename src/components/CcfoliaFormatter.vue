@@ -310,7 +310,8 @@
         if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
       tabColors(name) {
-        const uniqueRow = this.ccfoliaLog.rows.find(x => x.tab_name == name && x.color != '#222222' && x.color != '#888888');
+        // KP, GM, DLを含む発言者は判定に使用しない
+        const uniqueRow = this.ccfoliaLog.rows.find(x => x.tab_name == name && x.color != '#222222' && x.color != '#888888' && !x.name.match(/GM|KP|DL/));
         if(!uniqueRow) return {name: name, line_color: '#aaa', background_color: '#f7f7f7'}
         return {name: name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05) }
       },
