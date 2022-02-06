@@ -128,7 +128,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2021-09-14 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-02-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -141,6 +141,7 @@
         <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
         <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
         <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
+        <li>2022-02-06 タブ色設定の初期色を変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -298,15 +299,33 @@
             name: '1',
             body: '1日目',
           });
-          self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
           const tabs = uniqTabs.reduce((result, x) => {
-            if(x != 'メイン' && x != '雑談' && x != '情報') result.push({name: x, line_color: '#aaa', background_color: '#f7f7f7' });
+            if(x != 'メイン' && x != '雑談' && x != '情報') result.push(self.tabColors(x));
             return result;
           }, []);
+          self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
           self.ccfoliaLog.tabs = tabs;
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
         if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
+      },
+      tabColors(name) {
+        const uniqueRow = this.ccfoliaLog.rows.find(x => x.tab_name == name && x.color != '#222222' && x.color != '#888888');
+        if(!uniqueRow) return {name: name, line_color: '#aaa', background_color: '#f7f7f7'}
+        return {name: name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05) }
+      },
+      compositeColor(code, alpha) {
+        const colorCode = parseInt(code, 16) * alpha + 255 * (1 - alpha);
+        return Math.floor(colorCode).toString(16);
+      },
+      convertToPaleColor(colorCode, alpha) {
+        // colorCodeは`#`を除いた16進数とします。
+        const codes = [colorCode.slice(0, 2), colorCode.slice(2, 4), colorCode.slice(4, 6)];
+        return codes.map(code => this.compositeColor(code, alpha)).join("");
+      },
+      convertToPaleColorSharp(colorCodeSharp, alpha) {
+        const colorCode = colorCodeSharp.slice(1);
+        return '#' + this.convertToPaleColor(colorCode, alpha);
       },
       diceType(body) {
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
