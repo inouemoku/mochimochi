@@ -18,12 +18,13 @@ export default class LogRow {
     return (log_row == null || log_row[param] == null) ? initValue : log_row[param]
   }
 
-  format(system, tabs) {
+  format(system, tabs, selectedOutputTabs) {
     if(this.is_divider) {
       return `
     <h2 id="key${this.key}" class="day">${this.body}</h2><hr class="day-line">
 `
     }
+    if(!selectedOutputTabs.includes(this.tab_name)) return '';
     const diceText = this.dice_type ? this.dice_type.class : '';
     let body = this.body;
     if(system == "coc6") {

@@ -78,13 +78,22 @@
         </el-card>
         <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.tabs.length > 0">
           <div slot="header" class="clearfix">
-            <span>タブ色設定  <el-tooltip
+            <span>タブ設定  <el-tooltip
               effect="dark"  placement="top-start">
-              <div slot="content">雑談、情報以外のタブの色の設定ができます。<br/>左側がラインの色、右側が背景色です。</div>
+              <div slot="content">出力するタブを設定できます。<br/>雑談、情報以外のタブの色の設定ができます。<br/>左側がラインの色、右側が背景色です。</div>
               <el-button icon="el-icon-question" type="text"></el-button>
             </el-tooltip></span>
           </div>
-          <div v-for="tab in ccfoliaLog.tabs" :key="tab.name">
+          <small>チェックの入っているタブが出力されます。</small>
+          <el-checkbox-group v-model="selectedOutputTabs">
+            <el-checkbox label="メイン"></el-checkbox>
+            <el-checkbox label="情報"></el-checkbox>
+            <el-checkbox label="雑談"></el-checkbox>
+            <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
+          </el-checkbox-group>
+          <el-divider v-if="ccfoliaLog.tabs.length > 0"></el-divider>
+          <div class="mb-2" v-if="ccfoliaLog.tabs.length > 0">色設定</div>
+          <div v-for="tab in ccfoliaLog.tabs" :key="tab.name" v-show="selectedOutputTabs.includes(tab.name)">
             <el-color-picker
               v-model="tab.line_color"
               :predefine="predefineColors">
@@ -109,7 +118,7 @@
           </div>
           <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-              <div v-if="!row.is_divider" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable">
+              <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable">
                 <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
               </div>
               <div v-if="row.is_divider">
@@ -128,7 +137,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-02-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-04-22 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -142,6 +151,7 @@
         <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
         <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
         <li>2022-02-06 タブ色設定の初期色を変更</li>
+        <li>2022-04-22 出力するタブを選択できるように変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -215,6 +225,7 @@
         selectedDiceResult: '',
         selectedDiceTabs: ['メイン'],
         selectedNameTabs: [],
+        selectedOutputTabs: [],
         names: [],
         drawer: false,
       }
@@ -233,7 +244,7 @@
       // 整形
       postCcfoliaLog(){
         const filename = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1_整形.html');
-        this.downloadBlob(this.ccfoliaLog.format(), filename, 'text/html');
+        this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs), filename, 'text/html');
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
@@ -303,6 +314,7 @@
             if(x != 'メイン' && x != '雑談' && x != '情報') result.push(self.tabColors(x));
             return result;
           }, []);
+          self.selectedOutputTabs = uniqTabs.map(x => x);
           self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
           self.ccfoliaLog.tabs = tabs;
         }
