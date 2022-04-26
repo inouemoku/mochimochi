@@ -12,42 +12,48 @@ export default class LogRow {
     this._is_divider = this.paramFromObject(log_row, 'is_divider');
     this._dice_type  = this.paramFromObject(log_row, 'dice_type');
     this._is_oneline = this.paramFromObject(log_row, 'is_oneline');
+    this._is_secret  = this.paramFromObject(log_row, 'is_secret');
   }
 
   paramFromObject(log_row, param, initValue = null) {
     return (log_row == null || log_row[param] == null) ? initValue : log_row[param]
   }
 
-  format(system, tabs, selectedOutputTabs) {
+  format(system, tabs, selectedOutputTabs, isHideSecretDice) {
     if(this.is_divider) {
-      return `
-    <h2 id="key${this.key}" class="day">${this.body}</h2><hr class="day-line">
+      return `    <h2 id="key${this.key}" class="day">${this.body}</h2><hr class="day-line">
 `
     }
+    // 出力選択されていないタブの行は飛ばす
     if(!selectedOutputTabs.includes(this.tab_name)) return '';
+
+    const body = this.formatBySystem(system, isHideSecretDice);
+    return `      <div class="${this.class_name(tabs)}" style="color:${this.color};">
+        <span class="name-field"><span class="name"><span>${this.name}</span> :</span></span>
+        <span class="text">${body}</span>
+      </div>
+`
+  }
+
+  formatBySystem(system, isHideSecretDice) {
+    if(isHideSecretDice && this.is_secret) return 'シークレットダイス';
     const diceText = this.dice_type ? this.dice_type.class : '';
-    let body = this.body;
     if(system == "coc6") {
       if(this.is_oneline) {
-        body = this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
+        return this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
       } else {
-        body = this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
+        return this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
       }
     }
     if(system == "emoklore") {
       const dareq = /(.*)\((.*)\) ＞ \((.*)\) ＞ (.*)/;
       if(dareq.test(this.body)) {
-        body = this.body.replace(dareq, `$1<br>\n<span class="dice ${diceText}">($2) ＞ ($3) ＞ $4</span>`);
+        return this.body.replace(dareq, `$1<br>\n<span class="dice ${diceText}">($2) ＞ ($3) ＞ $4</span>`);
       } else {
-        body = this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
+        return this.body.replace(/(.*)\((.*)\)(.*)＞ (.*)/, `$1<br>\n<span class="dice ${diceText}">($2)$3＞ $4</span>`);
       }
     }
-    return `
-      <div class="${this.class_name(tabs)}" style="color:${this.color};">
-        <span class="name-field"><span class="name"><span>${this.name}</span> :</span></span>
-        <span class="text">${body}</span>
-      </div>
-`
+    return this.body;
   }
 
   class_name(tabs) {
@@ -130,4 +136,12 @@ export default class LogRow {
   get is_oneline() { return this._is_oneline; }
 
   set is_oneline(value) { this._is_oneline = value; }
+
+  /**
+   * ダイス結果が一行か
+   * @returns {boolean}
+   */
+  get is_secret() { return this._is_secret; }
+
+  set is_secret(value) { this._is_secret = value; }
 }

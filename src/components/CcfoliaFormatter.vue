@@ -91,6 +91,7 @@
             <el-checkbox label="雑談"></el-checkbox>
             <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
           </el-checkbox-group>
+          <el-checkbox v-model="isHideSecretDice" label="シークレットダイスを隠す" border size="small"></el-checkbox>
           <el-divider v-if="ccfoliaLog.tabs.length > 0"></el-divider>
           <div class="mb-2" v-if="ccfoliaLog.tabs.length > 0">色設定</div>
           <div v-for="tab in ccfoliaLog.tabs" :key="tab.name" v-show="selectedOutputTabs.includes(tab.name)">
@@ -119,7 +120,7 @@
           <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
               <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable">
-                <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
+                <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
               </div>
               <div v-if="row.is_divider">
                 <el-row :gutter="5">
@@ -137,7 +138,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-04-22 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-04-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -152,6 +153,7 @@
         <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
         <li>2022-02-06 タブ色設定の初期色を変更</li>
         <li>2022-04-22 出力するタブを選択できるように変更</li>
+        <li>2022-04-26 シークレットダイスの結果を隠せるように変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -228,6 +230,7 @@
         selectedOutputTabs: [],
         names: [],
         drawer: false,
+        isHideSecretDice: false,
       }
     },
     props: {
@@ -244,7 +247,7 @@
       // 整形
       postCcfoliaLog(){
         const filename = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1_整形.html');
-        this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs), filename, 'text/html');
+        this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs, this.isHideSecretDice), filename, 'text/html');
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
@@ -290,7 +293,7 @@
           }
           const ptags = doc.getElementsByTagName('p')
           self.ccfoliaLog.rows = Array.prototype.slice.call(ptags).map((p) => {
-            const { isOneline, diceType } = self.diceType(p.children[2].innerHTML);
+            const { isOneline, diceType, isSecret } = self.diceType(p.children[2].innerHTML);
             const row = {
               color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
               tab_name: p.children[0].innerText.replace(/^ \[(.*)\]/, '$1'),
@@ -298,6 +301,7 @@
               body: p.children[2].innerHTML,
               dice_type: diceType,
               is_oneline: isOneline,
+              is_secret: isSecret,
             };
             return LogRow.fromObject(row);
           });
@@ -317,6 +321,7 @@
           self.selectedOutputTabs = uniqTabs.map(x => x);
           self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
           self.ccfoliaLog.tabs = tabs;
+          console.log('onload end')
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
         if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
@@ -341,17 +346,18 @@
         return '#' + this.convertToPaleColor(colorCode, alpha);
       },
       diceType(body) {
+        const isSecret = body.match(/\n  *(s|S)/) ? true : false;
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
         if(isOneline) {
           const regO = new RegExp(`.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
           const rowO = body.match(regO);
-          if(rowO) return {isOneline: true, diceType: this.system.diceTypes.find(d => d.name == rowO[1])};
-          return { isOneline: true, diceType: null };
+          if(rowO) return {isOneline: true, diceType: this.system.diceTypes.find(d => d.name == rowO[1]), isSecret: isSecret};
+          return { isOneline: true, diceType: null, isSecret: isSecret };
         }
         const reg = new RegExp(`.*${this.system.diceText} :.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
         const row = body.match(reg);
-        if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1])};
-        return { isOneline: false, diceType: null }
+        if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1]), isSecret: isSecret};
+        return { isOneline: false, diceType: null, isSecret: isSecret }
       },
       backgroundColor(tabName) {
         if(tabName == "メイン") return "#ffffff";
