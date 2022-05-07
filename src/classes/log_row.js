@@ -45,7 +45,7 @@ export default class LogRow {
         return this.body.replace(/(.*)\nCthulhu : (.*)/, `$1<br>\n<span class="dice ${diceText}">Cthulhu :$2\n</span>`);
       }
     }
-    if(system == "emoklore") {
+    if(system == "emoklore" || system == "insane" || system == "shinobigami") {
       const dareq = /(.*)\((.*)\) ＞ \((.*)\) ＞ (.*)/;
       if(dareq.test(this.body)) {
         return this.body.replace(dareq, `$1<br>\n<span class="dice ${diceText}">($2) ＞ ($3) ＞ $4</span>`);

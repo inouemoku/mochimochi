@@ -138,7 +138,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-04-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-05-07 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -154,6 +154,7 @@
         <li>2022-02-06 タブ色設定の初期色を変更</li>
         <li>2022-04-22 出力するタブを選択できるように変更</li>
         <li>2022-04-26 シークレットダイスの結果を隠せるように変更</li>
+        <li>2022-05-07 インセイン、シノビガミに対応</li>
       </ul>
     </el-drawer>
   </div>
@@ -219,6 +220,34 @@
               { resultKey: 'success', name: '成功!', class: 'success'  },
               { resultKey: 'failed', name: '失敗!', class: 'failed' },
               { resultKey: 'famble', name: 'ファンブル!', class: 'failed' }
+            ]
+          },
+          { key: 'insane', prefix: '【インセイン】', name: 'インセイン', diceText: 'Insane',
+            diceResults: [
+              { key: 'special', name: 'スペシャル' },
+              { key: 'success', name: '成功' },
+              { key: 'failed', name: '失敗' },
+              { key: 'famble', name: 'ファンブル' }
+            ],
+            diceTypes: [
+              { resultKey: 'famble', name: 'ファンブル', class: 'failed' },
+              { resultKey: 'special', name: 'スペシャル', class: 'success' },
+              { resultKey: 'success', name: '成功', class: 'success' },
+              { resultKey: 'failed', name: '失敗', class: 'failed' },
+            ]
+          },
+          { key: 'shinobigami', prefix: '【シノビガミ】', name: 'シノビガミ', diceText: 'ShinobiGami',
+            diceResults: [
+              { key: 'special', name: 'スペシャル' },
+              { key: 'success', name: '成功' },
+              { key: 'failed', name: '失敗' },
+              { key: 'famble', name: 'ファンブル' }
+            ],
+            diceTypes: [
+              { resultKey: 'famble', name: 'ファンブル', class: 'failed' },
+              { resultKey: 'special', name: 'スペシャル', class: 'success' },
+              { resultKey: 'success', name: '成功', class: 'success' },
+              { resultKey: 'failed', name: '失敗', class: 'failed' },
             ]
           },
           { key: 'other', prefix: '', name: 'その他', diceText: '', diceResults: [], diceTypes: []}
