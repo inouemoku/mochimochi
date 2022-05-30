@@ -138,7 +138,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-05-20 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-05-30 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -156,6 +156,7 @@
         <li>2022-04-26 シークレットダイスの結果を隠せるように変更</li>
         <li>2022-05-07 インセイン、シノビガミに対応</li>
         <li>2022-05-20 シークレットダイスの判定を修正</li>
+        <li>2022-05-30 シークレットダイスの判定を修正</li>
       </ul>
     </el-drawer>
   </div>
@@ -378,15 +379,18 @@
       diceType(body) {
         const isSecret = body.match(/\n  *(s|S)/) ? true : false;
         const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
+        const isDiceRoll = body.match(/(.*)\((.*)\)(.*)＞ (.*)/);
         if(isOneline) {
           const regO = new RegExp(`.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
           const rowO = body.match(regO);
           if(rowO) return {isOneline: true, diceType: this.system.diceTypes.find(d => d.name == rowO[1]), isSecret: isSecret};
+          if(isDiceRoll) return {isOneline: true, diceType: null, isSecret: isSecret};
           return { isOneline: true, diceType: null, isSecret: false };
         }
         const reg = new RegExp(`.*${this.system.diceText} :.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
         const row = body.match(reg);
         if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1]), isSecret: isSecret};
+        if(isDiceRoll) return { isOneline: false, diceType: null, isSecret: isSecret }
         return { isOneline: false, diceType: null, isSecret: false }
       },
       backgroundColor(tabName) {
