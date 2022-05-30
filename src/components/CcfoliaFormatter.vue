@@ -76,7 +76,7 @@
             <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
           </div>
         </el-card>
-        <el-card shadow="never" class="mb-3" v-show="ccfoliaLog.tabs.length > 0">
+        <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
             <span>タブ設定  <el-tooltip
               effect="dark"  placement="top-start">
