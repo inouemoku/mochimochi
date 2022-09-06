@@ -117,9 +117,9 @@
             </el-tooltip>
             </span>
           </div>
-          <draggable :options="{animation:200}" :list="ccfoliaLog.rows">
+          <draggable :options="{animation:200, handle:'.handle'}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-              <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable">
+              <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
                 <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
               </div>
               <div v-if="row.is_divider">
@@ -128,6 +128,7 @@
                   <el-col :span="2"><el-input v-model="row.name" size="mini" placeholder="リンク名"></el-input></el-col>
                   <el-col :span="10"><el-input v-model="row.body" size="mini" placeholder="表示名"></el-input></el-col>
                   <el-col :span="1"><el-button size="mini" @click="removeRow(index)" icon="el-icon-delete" /></el-col>
+                  <el-col :span="10" class="draggable handle text-white">:</el-col>
                 </el-row>
               </div>
             </div>
@@ -138,7 +139,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-05-30 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-09-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -157,6 +158,7 @@
         <li>2022-05-07 インセイン、シノビガミに対応</li>
         <li>2022-05-20 シークレットダイスの判定を修正</li>
         <li>2022-05-30 シークレットダイスの判定を修正</li>
+        <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
       </ul>
     </el-drawer>
   </div>
