@@ -35,6 +35,20 @@ export default class LogRow {
 `
   }
 
+  notFormat(selectedOutputTabs, isHideSecretDice) {
+    // 出力選択されていないタブの行は飛ばす
+    if(!selectedOutputTabs.includes(this.tab_name)) return '';
+    const body = (isHideSecretDice && this.is_secret) ? 'シークレットダイス' : this.body;
+    
+    return `    <p style="color:${this.color};">
+      <span> [${this.tab_name}]</span>
+      <span>${this.name}</span> :
+      <span>${body}</span>
+    </p>
+    
+`
+  }
+
   formatBySystem(system, isHideSecretDice) {
     if(isHideSecretDice && this.is_secret) return 'シークレットダイス';
     const diceText = this.dice_type ? this.dice_type.class : '';

@@ -135,11 +135,18 @@
           </draggable>
         </el-card>
       </div>
-        <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
+        <el-tooltip placement="top-start">
+          <div slot="content">ヘッダーやタブなど全ての設定が反映されます。</div>
+          <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
+        </el-tooltip>
+        <el-tooltip placement="top-start">
+          <div slot="content">タブとシークレットダイスの設定だけ反映されます。</div>
+          <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button>
+        </el-tooltip>
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-09-06 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2022-10-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -159,6 +166,7 @@
         <li>2022-05-20 シークレットダイスの判定を修正</li>
         <li>2022-05-30 シークレットダイスの判定を修正</li>
         <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
+        <li>2022-10-26 整形しないでダウンロードする機能を追加</li>
       </ul>
     </el-drawer>
   </div>
@@ -281,6 +289,11 @@
       postCcfoliaLog(){
         const filename = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1_整形.html');
         this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs, this.isHideSecretDice), filename, 'text/html');
+      },
+      // 元の形式でダウンロード
+      postOriginalCcfoliaLog(){
+        const filename = this.ccfoliaLog.file.name;
+        this.downloadBlob(this.ccfoliaLog.notFormat(this.selectedOutputTabs, this.isHideSecretDice), filename, 'text/html');
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
