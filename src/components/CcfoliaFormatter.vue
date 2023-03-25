@@ -113,14 +113,16 @@
             <span>ログ全文  <el-tooltip
               effect="dark"  placement="top-start">
               <el-button icon="el-icon-question" type="text"></el-button>
-              <div slot="content">+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。<br/>行ごと掴んで順序を入れ替えることができます。</div>
+              <div slot="content">+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。<br/>行ごと掴んで順序を入れ替えることができます。<br/>磁石ボタンを押すと2回目に押した磁石ボタンまでの間にある同じタブ名の行をまとめることができます。</div>
             </el-tooltip>
             </span>
           </div>
           <draggable :options="{animation:200, handle:'.handle'}" :list="ccfoliaLog.rows">
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
               <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
-                <el-button size="mini" @click="addRow(index)">+</el-button> [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
+                <el-button size="mini" @click="addRow(index)">+</el-button>
+                <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom || ccfoliaLog.rows[index].tab_name != ccfoliaLog.rows[attractFrom].tab_name)" @click="attract(index)"></el-button>
+                [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
               </div>
               <div v-if="row.is_divider">
                 <el-row :gutter="5">
@@ -146,7 +148,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2022-10-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2023-03-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -167,6 +169,7 @@
         <li>2022-05-30 シークレットダイスの判定を修正</li>
         <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
         <li>2022-10-26 整形しないでダウンロードする機能を追加</li>
+        <li>2023-03-26 タブごとに行をまとめる機能を追加</li>
       </ul>
     </el-drawer>
   </div>
@@ -272,6 +275,7 @@
         names: [],
         drawer: false,
         isHideSecretDice: false,
+        attractFrom: null,
       }
     },
     props: {
@@ -414,6 +418,29 @@
         if(tabName == "情報") return "#fafafa";
         return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
       },
+      attract(attractEnd) {
+        if (this.attractFrom === attractEnd) {
+          this.attractFrom = null;
+          return;
+        }
+        if (this.attractFrom === null) {
+          this.attractFrom = attractEnd;
+          return;
+        }
+        const rows = this.ccfoliaLog.rows;
+        const tabName = rows[this.attractFrom].tab_name;
+        for (let i = this.attractFrom + 1; i <= attractEnd; i++) {
+          if (rows[i].tab_name !== tabName) continue;
+          rows.splice(this.attractFrom + 1, 0, rows.splice(i, 1)[0]);
+          this.attractFrom++;
+        }
+        this.attractFrom = null;
+      },
+      attractButtonType(index) {
+        if(this.attractFrom == index) return 'info';
+        if(this.attractFrom == null || index < this.attractFrom || this.ccfoliaLog.rows[index].tab_name != this.ccfoliaLog.rows[this.attractFrom].tab_name) return null;
+        return 'primary';
+      }
     },
     computed: {
       dividerRows: function() {
