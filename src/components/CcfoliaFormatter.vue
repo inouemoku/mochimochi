@@ -327,13 +327,11 @@
       analyzeHtml() {
         const fileReader = new FileReader();
         const self = this;
-        fileReader.onload = function(e){
-          console.log(e);
+        fileReader.onload = function() {
           const parser = new DOMParser();
           const doc = parser.parseFromString(fileReader.result, "text/html");
-          // parseに失敗した場合中断
           const parsererror = doc.getElementsByTagName('parsererror');
-          if(parsererror.length > 0) {
+          if (parsererror.length > 0) {
             self.$message({
               type: 'error',
               message: 'ファイルの解析に失敗しました',
@@ -341,8 +339,8 @@
             console.log(parsererror);
             return;
           }
-          const ptags = doc.getElementsByTagName('p')
-          self.ccfoliaLog.rows = Array.prototype.slice.call(ptags).map((p) => {
+          const ptags = Array.from(doc.getElementsByTagName('p'));
+          self.ccfoliaLog.rows = ptags.map((p) => {
             const { isOneline, diceType, isSecret } = self.diceType(p.children[2].innerHTML);
             const row = {
               color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
@@ -355,8 +353,16 @@
             };
             return LogRow.fromObject(row);
           });
-          self.names = [...new Set(self.ccfoliaLog.rows.filter(x => x.dice_type != null).map(x => x.name))];
-          self.selectedNameTabs = self.names;
+          const { names, selectedNameTabs } = self.ccfoliaLog.rows.filter(x => x.dice_type != null)
+            .reduce(({ names, selectedNameTabs }, x) => {
+              if (!names.includes(x.name)) {
+                names.push(x.name);
+                selectedNameTabs.push(x.name);
+              }
+              return { names, selectedNameTabs };
+            }, { names: [], selectedNameTabs: [] });
+          self.names = names;
+          self.selectedNameTabs = selectedNameTabs;
           const uniqTabs = [...new Set(self.ccfoliaLog.rows.map(x => x.tab_name))];
           const dayLine = LogRow.fromObject({
             key: 0,
@@ -365,10 +371,10 @@
             body: '1日目',
           });
           const tabs = uniqTabs.reduce((result, x) => {
-            if(x != 'メイン' && x != '雑談' && x != '情報') result.push(self.tabColors(x));
+            if (x != 'メイン' && x != '雑談' && x != '情報') result.push(self.tabColors(x));
             return result;
           }, []);
-          self.selectedOutputTabs = uniqTabs.map(x => x);
+          self.selectedOutputTabs = uniqTabs;
           self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
           self.ccfoliaLog.tabs = tabs;
           console.log('onload end')
@@ -378,9 +384,17 @@
       },
       tabColors(name) {
         // KP, GM, DLを含む発言者は判定に使用しない
-        const uniqueRow = this.ccfoliaLog.rows.find(x => x.tab_name == name && x.color != '#222222' && x.color != '#888888' && !x.name.match(/GM|KP|DL/));
-        if(!uniqueRow) return {name: name, line_color: '#aaa', background_color: '#f7f7f7'}
-        return {name: name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05) }
+        const filteredRows = this.ccfoliaLog.rows.filter(x => x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
+        if (filteredRows.length === 0) {
+          return { name, line_color: '#aaa', background_color: '#f7f7f7' };
+        }
+        const uniqueRow = filteredRows.reduce((acc, cur) => {
+          if (!acc || acc.color === cur.color) {
+            return cur;
+          }
+          return acc;
+        }, null);
+        return { name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05) };
       },
       compositeColor(code, alpha) {
         const colorCode = parseInt(code, 16) * alpha + 255 * (1 - alpha);
@@ -396,21 +410,28 @@
         return '#' + this.convertToPaleColor(colorCode, alpha);
       },
       diceType(body) {
-        const isSecret = body.match(/\n  *(s|S)/) ? true : false;
-        const isOneline = !(body.match(`.*${this.system.diceText} :.*＞.*`));
+        const { system } = this;
+        const isSecret = /\n\s*[sS]/.test(body);
+        const isOneline = !/.*${system.diceText} :.*＞.*/.test(body);
         const isDiceRoll = body.match(/(.*)\((.*)\)(.*)＞ (.*)/);
-        if(isOneline) {
-          const regO = new RegExp(`.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
+        if (isOneline) {
+          const regO = new RegExp(`.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
           const rowO = body.match(regO);
-          if(rowO) return {isOneline: true, diceType: this.system.diceTypes.find(d => d.name == rowO[1]), isSecret: isSecret};
-          if(isDiceRoll) return {isOneline: true, diceType: null, isSecret: isSecret};
+          if (rowO) {
+            const diceType = system.diceTypes.find(d => d.name === rowO[1]);
+            return { isOneline: true, diceType, isSecret };
+          }
+          if (isDiceRoll) return { isOneline: true, diceType: null, isSecret };
           return { isOneline: true, diceType: null, isSecret: false };
         }
-        const reg = new RegExp(`.*${this.system.diceText} :.*＞ (${this.system.diceTypes.map(x => x.name).join('|')})`)
+        const reg = new RegExp(`.*${system.diceText} :.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
         const row = body.match(reg);
-        if(row) return { isOneLlne: false, diceType: this.system.diceTypes.find(d => d.name == row[1]), isSecret: isSecret};
-        if(isDiceRoll) return { isOneline: false, diceType: null, isSecret: isSecret }
-        return { isOneline: false, diceType: null, isSecret: false }
+        if (row) {
+          const diceType = system.diceTypes.find(d => d.name === row[1]);
+          return { isOneLlne: false, diceType, isSecret };
+        }
+        if (isDiceRoll) return { isOneline: false, diceType: null, isSecret };
+        return { isOneline: false, diceType: null, isSecret: false };
       },
       backgroundColor(tabName) {
         if(tabName == "メイン") return "#ffffff";
