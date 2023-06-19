@@ -28,11 +28,18 @@ export default class LogRow {
     if(!selectedOutputTabs.includes(this.tab_name)) return '';
 
     const body = this.formatBySystem(system, isHideSecretDice);
-    return `      <div class="${this.class_name(tabs)}" style="color:${this.color};">
+    return `      <div class="${this.class_name(tabs)}" style="color:${this.color};" tab-name="${this.htmlSpecialChars(this.tab_name)}">
         <span class="name-field"><span class="name"><span>${this.name}</span> :</span></span>
         <span class="text">${body}</span>
       </div>
 `
+  }
+
+  htmlSpecialChars(unsafeText){
+    var text = document.createTextNode(unsafeText);
+    var p = document.createElement('p');
+    p.appendChild(text);
+    return p.innerHTML;
   }
 
   notFormat(selectedOutputTabs, isHideSecretDice) {

@@ -148,7 +148,7 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2023-03-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2023-06-19 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
@@ -170,6 +170,7 @@
         <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
         <li>2022-10-26 整形しないでダウンロードする機能を追加</li>
         <li>2023-03-26 タブごとに行をまとめる機能を追加</li>
+        <li>2023-06-19 整形したログを再度読み込めるように変更</li>
       </ul>
     </el-drawer>
   </div>
@@ -324,6 +325,7 @@
           linkEl.parentNode.removeChild(linkEl);
         }
       },
+      // ログHTMLを解析する
       analyzeHtml() {
         const fileReader = new FileReader();
         const self = this;
@@ -339,52 +341,192 @@
             console.log(parsererror);
             return;
           }
-          const ptags = Array.from(doc.getElementsByTagName('p'));
-          self.ccfoliaLog.rows = ptags.map((p) => {
-            const { isOneline, diceType, isSecret } = self.diceType(p.children[2].innerHTML);
-            const row = {
-              color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
-              tab_name: p.children[0].innerText.replace(/^ \[(.*)\]/, '$1'),
-              name: p.children[1].innerText,
-              body: p.children[2].innerHTML,
-              dice_type: diceType,
-              is_oneline: isOneline,
-              is_secret: isSecret,
-            };
-            return LogRow.fromObject(row);
-          });
-          const { names, selectedNameTabs } = self.ccfoliaLog.rows.filter(x => x.dice_type != null)
-            .reduce(({ names, selectedNameTabs }, x) => {
-              if (!names.includes(x.name)) {
-                names.push(x.name);
-                selectedNameTabs.push(x.name);
-              }
-              return { names, selectedNameTabs };
-            }, { names: [], selectedNameTabs: [] });
-          self.names = names;
-          self.selectedNameTabs = selectedNameTabs;
-          const uniqTabs = [...new Set(self.ccfoliaLog.rows.map(x => x.tab_name))];
-          const dayLine = LogRow.fromObject({
-            key: 0,
-            is_divider: true,
-            name: '1',
-            body: '1日目',
-          });
-          const tabs = uniqTabs.reduce((result, x) => {
-            if (x != 'メイン' && x != '雑談' && x != '情報') result.push(self.tabColors(x));
-            return result;
-          }, []);
-          self.selectedOutputTabs = uniqTabs;
-          self.ccfoliaLog.rows = [dayLine].concat(self.ccfoliaLog.rows);
-          self.ccfoliaLog.tabs = tabs;
+          const mochi = doc.getElementsByClassName('main');
+          if(mochi.length > 0) {
+            self.analyzeHtmlMochiMochi(doc);
+          } else {
+            self.analyzeHtmlCcfolia(doc);
+          }
           console.log('onload end')
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
         if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
-      tabColors(name) {
+      // ココフォリアから出力したログを解析する
+      analyzeHtmlCcfolia(doc) {
+        const ptags = Array.from(doc.getElementsByTagName('p'));
+        this.ccfoliaLog.rows = ptags.map((p) => {
+          const { isOneline, diceType, isSecret } = this.diceType(p.children[2].innerHTML);
+          const row = {
+            color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
+            tab_name: p.children[0].innerText.replace(/^ \[(.*)\]/, '$1'),
+            name: p.children[1].innerText,
+            body: p.children[2].innerHTML,
+            dice_type: diceType,
+            is_oneline: isOneline,
+            is_secret: isSecret,
+          };
+          return LogRow.fromObject(row);
+        });
+        const { names, selectedNameTabs } = this.ccfoliaLog.rows.filter(x => x.dice_type != null)
+          .reduce(({ names, selectedNameTabs }, x) => {
+            if (!names.includes(x.name)) {
+              names.push(x.name);
+              selectedNameTabs.push(x.name);
+            }
+            return { names, selectedNameTabs };
+          }, { names: [], selectedNameTabs: [] });
+        this.names = names;
+        this.selectedNameTabs = selectedNameTabs;
+        const uniqTabs = [...new Set(this.ccfoliaLog.rows.map(x => x.tab_name))];
+        const dayLine = LogRow.fromObject({
+          key: 0,
+          is_divider: true,
+          name: '1',
+          body: '1日目',
+        });
+        const tabs = uniqTabs.reduce((result, x) => {
+          if (x != 'メイン' && x != '雑談' && x != '情報') result.push(this.tabColors(x));
+          return result;
+        }, []);
+        this.selectedOutputTabs = uniqTabs;
+        this.ccfoliaLog.rows = [dayLine].concat(this.ccfoliaLog.rows);
+        this.ccfoliaLog.tabs = tabs;
+      },
+      // MochiMochiで整形したログを解析する
+      analyzeHtmlMochiMochi(doc) {
+        const header = Array.from(doc.getElementById('header').children);
+        this.ccfoliaLog.title = header[0].innerText;
+        const menus = Array.from(header[1].children).map((menu) => {
+          return { key: menu.hash.slice(1), name: menu.innerText }
+        });
+        console.log(doc.getElementsByClassName('main')[0].children)
+        const tags = Array.from(doc.getElementsByClassName('main')[0].children);
+        const style = doc.getElementsByTagName('style')[0].innerText;
+        const css = this.parseCssToObject(style)
+        // ヘッダー背景色
+        const headerColor = css.find(c => c.key == '#header').contents.background.match(/linear-gradient\((#.*),(#.*)\)/)
+        this.ccfoliaLog.header_color1 = headerColor[1];
+        this.ccfoliaLog.header_color2 = headerColor[2];
+        // RGBを16進数に変換
+        const rgbTo16 = function(col) {
+          return "#" + col.match(/\d+/g).map(function(a){return ("0" + parseInt(a).toString(16)).slice(-2)}).join("");
+        }
+        this.ccfoliaLog.rows = tags.map((tag) => {
+          if(tag.className == "day-line") return;
+          if(tag.className == "day") {
+            const key = tag.id.slice(3);
+            const dayLine = LogRow.fromObject({
+              key: key,
+              is_divider: true,
+              name: menus.find(m => m.key.slice(3) == key).name,
+              body: tag.innerText,
+            });
+            return dayLine;
+          }
+          const diceTypeM =  this.diceTypeMochi(tag.children[1]);
+          const body = diceTypeM == null ? tag.children[1].innerHTML : this.htmlSpecialChars(`${tag.children[1].innerText}`);
+          const { isOneline, diceType, isSecret } = this.diceType(body);
+          const row = {
+            color: rgbTo16(tag.style.color),
+            tab_name: this.tabNameMochi(tag),
+            name: tag.children[0].children[0].innerText.slice(0, -2),
+            body: body,
+            dice_type: diceType,
+            is_oneline: isOneline,
+            is_secret: isSecret,
+          };
+          return LogRow.fromObject(row);
+        }).filter(e => e);
+        const { names, selectedNameTabs } = this.ccfoliaLog.rows.filter(x => x.dice_type != null)
+          .reduce(({ names, selectedNameTabs }, x) => {
+            if (!names.includes(x.name)) {
+              names.push(x.name);
+              selectedNameTabs.push(x.name);
+            }
+            return { names, selectedNameTabs };
+          }, { names: [], selectedNameTabs: [] });
+        this.names = names;
+        this.selectedNameTabs = selectedNameTabs;
+        const uniqTabs = [...new Set(this.ccfoliaLog.rows.map(x => x.tab_name))].filter(e => e);
+        var index = 0;
+        const tabs = uniqTabs.reduce((result, x) => {
+          if (x != 'メイン' && x != '雑談' && x != '情報') {
+            const content = css.find(c => c.key == `.tab${index}`).contents;
+            const lineColor = content['border-left'].match(/.*(#.*)/)[1]
+            const backgroundColor = content['background-color']
+            index = index + 1;
+            result.push(this.tabColors(x, lineColor, backgroundColor));
+          }
+          return result;
+        }, []);
+        this.selectedOutputTabs = uniqTabs;
+        this.ccfoliaLog.tabs = tabs;
+        console.log(this.ccfoliaLog.tabs);
+      },
+      htmlSpecialChars(unsafeText){
+        var text = document.createTextNode(unsafeText);
+        var p = document.createElement('p');
+        p.appendChild(text);
+        return p.innerHTML;
+      },
+      // タブ名を抽出する
+      tabNameMochi(tag) {
+        if(tag.attributes['tab-name'] != null) return tag.attributes['tab-name'].nodeValue
+        if(tag.classList[0] == null) return 'メイン';
+        if(tag.classList[0] == 'info') return '情報';
+        if(tag.classList[0] == 'other') return '雑談';
+        if(tag.classList[0] == 'secret') return tag.classList[1];
+      },
+      // ダイスタイプを取得する
+      diceTypeMochi(text) {
+        if(text.children[1] == null) return null;
+        const diceType = text.children[1].classList[1];
+        if(diceType == null) return null;
+        return diceType;
+      },
+      // CSSの文字列をオブジェクトに変換する
+      parseCssToObject(inputString) {
+        var resultObject = [];
+      
+        // ブロックを正規表現で抽出
+        var blocks = inputString.match(/(.*){([^{}]+)}/g);
+      
+        if (blocks) {
+          blocks.forEach(block => {
+            const regex = /(.*)\s*{([^}]*)}/;
+            const match = block.match(regex);
+            
+            if (match) {
+              const key = match[1].trim();
+              const content = match[2].trim();
+
+              // 中身をオブジェクトに変換
+              var contentObject = {};
+              content.split(";").forEach(function (property) {
+                property = property.replace(/\r?\n? /g, '');
+                var parts = property.split(":");
+                if(parts[0].length == 0) return;
+                var key = parts[0].trim();
+                var value = parts[1].trim();
+                contentObject[key] = value;
+              });
+      
+              resultObject.push({key, contents: contentObject});
+            }
+          });
+        }
+      
+        return resultObject;
+      },
+      // タブの色を決める
+      tabColors(name, lineColor = null, backgroundColor = null) {
+        if(lineColor != null && backgroundColor != null) {
+          return { name, line_color: lineColor, background_color: backgroundColor };
+        }
         // KP, GM, DLを含む発言者は判定に使用しない
-        const filteredRows = this.ccfoliaLog.rows.filter(x => x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
+        const filteredRows = this.ccfoliaLog.rows.filter(x => !x.is_divider && x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
+        console.log(filteredRows)
         if (filteredRows.length === 0) {
           return { name, line_color: '#aaa', background_color: '#f7f7f7' };
         }
