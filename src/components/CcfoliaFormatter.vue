@@ -593,9 +593,12 @@
           this.attractFrom = attractEnd;
           return;
         }
+        if(this.dogs.includes(attractEnd)) {
+          this.dogs = this.dogs.filter(x => x != attractEnd)
+          return;
+        }
         if (this.ccfoliaLog.rows[this.attractFrom].tab_name != this.ccfoliaLog.rows[attractEnd].tab_name) {
           this.dogs.push(attractEnd);
-          console.log(this.dogs)
           return;
         }
         const rows = this.ccfoliaLog.rows;
