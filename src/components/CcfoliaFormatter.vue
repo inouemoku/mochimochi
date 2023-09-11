@@ -121,7 +121,7 @@
             <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
               <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
                 <el-button size="mini" @click="addRow(index)">+</el-button>
-                <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom || ccfoliaLog.rows[index].tab_name != ccfoliaLog.rows[attractFrom].tab_name)" @click="attract(index)"></el-button>
+                <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom)" @click="attract(index)"></el-button>
                 [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
               </div>
               <div v-if="row.is_divider">
@@ -148,29 +148,30 @@
     </el-form>
     <el-divider></el-divider>
     <small>
-      <div>最終更新: 2023-06-19 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2023-09-11 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
-        <li>2021-02-23 公開</li>
-        <li>2021-02-27 一行のダイス結果表記に対応</li>
-        <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
-        <li>2021-03-15 リンクが効かない不具合の修正</li>
-        <li>2021-03-29 エモクロアTRPGに対応</li>
-        <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
-        <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
-        <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
-        <li>2022-02-06 タブ色設定の初期色を変更</li>
-        <li>2022-04-22 出力するタブを選択できるように変更</li>
-        <li>2022-04-26 シークレットダイスの結果を隠せるように変更</li>
-        <li>2022-05-07 インセイン、シノビガミに対応</li>
-        <li>2022-05-20 シークレットダイスの判定を修正</li>
-        <li>2022-05-30 シークレットダイスの判定を修正</li>
-        <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
-        <li>2022-10-26 整形しないでダウンロードする機能を追加</li>
-        <li>2023-03-26 タブごとに行をまとめる機能を追加</li>
+        <li>2023-09-11 タブごとに行をまとめる時に他のタブも巻き込めるように変更</li>
         <li>2023-06-19 整形したログを再度読み込めるように変更</li>
+        <li>2023-03-26 タブごとに行をまとめる機能を追加</li>
+        <li>2022-10-26 整形しないでダウンロードする機能を追加</li>
+        <li>2022-09-06 本文の順序入れ替え時にフォーム部分が反応しないように修正</li>
+        <li>2022-05-30 シークレットダイスの判定を修正</li>
+        <li>2022-05-20 シークレットダイスの判定を修正</li>
+        <li>2022-05-07 インセイン、シノビガミに対応</li>
+        <li>2022-04-26 シークレットダイスの結果を隠せるように変更</li>
+        <li>2022-04-22 出力するタブを選択できるように変更</li>
+        <li>2022-02-06 タブ色設定の初期色を変更</li>
+        <li>2021-09-14 ヘッダーのタイトル色が変更されないのを修正</li>
+        <li>2021-06-27 背景色が編集パネルに反映されるように変更</li>
+        <li>2021-06-06 ダイス結果を名前で絞り込めるように変更</li>
+        <li>2021-03-29 エモクロアTRPGに対応</li>
+        <li>2021-03-15 リンクが効かない不具合の修正</li>
+        <li>2021-03-13 本文の順序を入れ替える機能を追加</li>
+        <li>2021-02-27 一行のダイス結果表記に対応</li>
+        <li>2021-02-23 公開</li>
       </ul>
     </el-drawer>
   </div>
@@ -277,6 +278,7 @@
         drawer: false,
         isHideSecretDice: false,
         attractFrom: null,
+        dogs: []
       }
     },
     props: {
@@ -584,23 +586,32 @@
       attract(attractEnd) {
         if (this.attractFrom === attractEnd) {
           this.attractFrom = null;
+          this.dogs = [];
           return;
         }
         if (this.attractFrom === null) {
           this.attractFrom = attractEnd;
           return;
         }
+        if (this.ccfoliaLog.rows[this.attractFrom].tab_name != this.ccfoliaLog.rows[attractEnd].tab_name) {
+          this.dogs.push(attractEnd);
+          console.log(this.dogs)
+          return;
+        }
         const rows = this.ccfoliaLog.rows;
         const tabName = rows[this.attractFrom].tab_name;
+        const dogs = this.dogs;
         for (let i = this.attractFrom + 1; i <= attractEnd; i++) {
-          if (rows[i].tab_name !== tabName) continue;
+          if (!dogs.includes(i) && rows[i].tab_name !== tabName) continue;
           rows.splice(this.attractFrom + 1, 0, rows.splice(i, 1)[0]);
           this.attractFrom++;
         }
         this.attractFrom = null;
+        this.dogs = [];
       },
       attractButtonType(index) {
         if(this.attractFrom == index) return 'info';
+        if(this.dogs.includes(index)) return 'warning';
         if(this.attractFrom == null || index < this.attractFrom || this.ccfoliaLog.rows[index].tab_name != this.ccfoliaLog.rows[this.attractFrom].tab_name) return null;
         return 'primary';
       }
