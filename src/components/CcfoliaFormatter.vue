@@ -23,32 +23,17 @@
           :initialSelectedNameTabs="selectedNameTabs"
           :ccfoliaLog="ccfoliaLog"
         />
-        <el-card shadow="never" class="mb-3">
-          <div slot="header" class="clearfix">
-            <span>ヘッダー設定  <el-tooltip
-              effect="dark"  placement="top-start">
-              <div slot="content">ヘッダー色とタイトルの設定ができます。<br/>色は左と真ん中が背景色、右が文字色です。</div>
-              <el-button icon="el-icon-question" type="text"></el-button>
-            </el-tooltip></span>
-          </div>
-          <el-color-picker
-            v-model="ccfoliaLog.header_color1"
-            :predefine="predefineColors">
-          </el-color-picker>
-          <el-color-picker
-            v-model="ccfoliaLog.header_color2"
-            :predefine="predefineColors">
-          </el-color-picker>
-          <el-color-picker
-            v-model="ccfoliaLog.link_color"
-            :predefine="predefineColors">
-          </el-color-picker>
-          <el-input v-model="ccfoliaLog.title" class="mb-2"></el-input>
-          <div class="mb-3" :style="`background:linear-gradient(${ccfoliaLog.header_color1},${ccfoliaLog.header_color2});color:${ccfoliaLog.link_color}`">
-            <div class="p-2">{{ccfoliaLog.title}}</div>
-            <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
-          </div>
-        </el-card>
+        <header-setting
+          :initialHeaderColor1="ccfoliaLog.header_color1"
+          :initialHeaderColor2="ccfoliaLog.header_color2"
+          :initialLinkColor="ccfoliaLog.link_color"
+          :initialTitle="ccfoliaLog.title"
+          :dividerRows="dividerRows"
+          @changeHeaderColor1="changeHeaderColor1"
+          @changeHeaderColor2="changeHeaderColor2"
+          @changeLinkColor="changeLinkColor"
+          @changeTitle="changeTitle"
+        />
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
             <span>タブ設定  <el-tooltip
@@ -128,29 +113,21 @@
   import draggable from 'vuedraggable'
   import SystemForm from './SystemForm.vue';
   import DiceResult from './DiceResult.vue';
+  import HeaderSetting from './HeaderSetting.vue';
   import Histories from './Histories.vue';
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
-  import dice_systems from '../mixins/dice_systems';
+  import common from '../mixins/common';
   
   export default {
     name: "CcfoliaFormatter",
-    mixins: [dice_systems],
+    mixins: [common],
     components: {
-      draggable, SystemForm, DiceResult, Histories,
+      draggable, SystemForm, DiceResult, HeaderSetting, Histories,
     },
     data() {
       return {
         ccfoliaLog: CcfoliaLog.fromObject(),
-        predefineColors: [
-          '#ff4500',
-          '#ff8c00',
-          '#ffd700',
-          '#90ee90',
-          '#00ced1',
-          '#1e90ff',
-          '#c71585',
-        ],
         system: {},
         selectedNameTabs: [],
         selectedOutputTabs: [],
@@ -166,6 +143,22 @@
       // システムを選択
       selectSystem(val) {
         this.ccfoliaLog.system = val;
+      },
+      // ヘッダー色1を変更
+      changeHeaderColor1(val) {
+        this.ccfoliaLog.header_color1 = val;
+      },
+      // ヘッダー色2を変更
+      changeHeaderColor2(val) {
+        this.ccfoliaLog.header_color2 = val;
+      },
+      // リンク色を変更
+      changeLinkColor(val) {
+        this.ccfoliaLog.link_color = val;
+      },
+      // タイトルを変更
+      changeTitle(val) {
+        this.ccfoliaLog.title = val;
       },
       // 行を追加
       addRow(index) {

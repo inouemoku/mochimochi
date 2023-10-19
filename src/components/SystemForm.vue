@@ -12,10 +12,10 @@
 </template>
 
 <script>
-  import dice_systems from "../mixins/dice_systems";
+  import common from "../mixins/common";
   export default {
     name: "SystemForm",
-    mixins: [dice_systems],
+    mixins: [common],
     props: {
       initialSystem: {
         type: String,
