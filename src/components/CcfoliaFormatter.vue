@@ -16,33 +16,13 @@
         </el-upload>
       </el-form-item>
       <div v-show="ccfoliaLog.rows.length > 0">
-        <el-card shadow="never" class="mb-3" v-if="ccfoliaLog.system != 'other'">
-          <div slot="header" class="clearfix">
-            <span>ダイス結果  <el-tooltip
-              effect="dark"  placement="top-start"
-              content="ダイス結果だけまとめて見られます。">
-              <el-button icon="el-icon-question" type="text"></el-button>
-            </el-tooltip></span>
-          </div>
-          <el-radio-group v-model="selectedDiceResult" size="mini">
-            <el-radio-button v-for="r in system.diceResults" :key="r.key" :label="r.key">{{ r.name }}</el-radio-button>
-          </el-radio-group>
-          <el-checkbox-group v-model="selectedDiceTabs">
-            <el-checkbox label="メイン"></el-checkbox>
-            <el-checkbox label="情報"></el-checkbox>
-            <el-checkbox label="雑談"></el-checkbox>
-            <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
-          </el-checkbox-group>
-          <el-checkbox-group v-model="selectedNameTabs">
-            <el-checkbox v-for="(aname, index) in names" :key="index" :label="aname"></el-checkbox>
-          </el-checkbox-group>
-          <small>計</small> {{diceRows.length}} <small>回</small>
-          <div v-for="(row, index) in diceRows" :key="index">
-            <div :style="`color:${row.color}`">
-              [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" />
-            </div>
-          </div>
-        </el-card>
+        <dice-result
+          :visible="ccfoliaLog.system != 'other'"
+          :system="system"
+          :names="names"
+          :initialSelectedNameTabs="selectedNameTabs"
+          :ccfoliaLog="ccfoliaLog"
+        />
         <el-card shadow="never" class="mb-3">
           <div slot="header" class="clearfix">
             <span>ヘッダー設定  <el-tooltip
@@ -147,6 +127,7 @@
 <script>
   import draggable from 'vuedraggable'
   import SystemForm from './SystemForm.vue';
+  import DiceResult from './DiceResult.vue';
   import Histories from './Histories.vue';
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
@@ -156,7 +137,7 @@
     name: "CcfoliaFormatter",
     mixins: [dice_systems],
     components: {
-      draggable, SystemForm, Histories 
+      draggable, SystemForm, DiceResult, Histories,
     },
     data() {
       return {
@@ -171,8 +152,6 @@
           '#c71585',
         ],
         system: {},
-        selectedDiceResult: '',
-        selectedDiceTabs: ['メイン'],
         selectedNameTabs: [],
         selectedOutputTabs: [],
         names: [],
@@ -256,7 +235,6 @@
           console.log('onload end')
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
-        if(this.system.diceTypes[0]) this.selectedDiceResult = this.system.diceTypes[0].resultKey;
       },
       // ココフォリアから出力したログを解析する
       analyzeHtmlCcfolia(doc) {
@@ -526,9 +504,6 @@
     computed: {
       dividerRows: function() {
         return this.ccfoliaLog.rows.filter(x => x.is_divider);
-      },
-      diceRows: function() {
-        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name) && this.selectedNameTabs.includes(x.name));
       },
     }
   };
