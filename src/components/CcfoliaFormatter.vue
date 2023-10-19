@@ -1,16 +1,9 @@
 <template>
   <div>
     <el-form ref="ccfoliaLog" :model="ccfoliaLog" class="mb-5">
-      <el-form-item prop="system">
-        <el-select v-model="ccfoliaLog.system">
-          <el-option
-            v-for="s in systems"
-            :key="s.key"
-            :label="s.name"
-            :value="s.key">
-          </el-option>
-        </el-select>
-      </el-form-item>
+      <system-form
+        @select="selectSystem"
+      />
       <el-form-item prop="file">
         <el-upload
           drag
@@ -153,14 +146,17 @@
 
 <script>
   import draggable from 'vuedraggable'
+  import SystemForm from './SystemForm.vue';
   import Histories from './Histories.vue';
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
+  import dice_systems from '../mixins/dice_systems';
   
   export default {
     name: "CcfoliaFormatter",
+    mixins: [dice_systems],
     components: {
-      draggable, Histories
+      draggable, SystemForm, Histories 
     },
     data() {
       return {
@@ -173,76 +169,6 @@
           '#00ced1',
           '#1e90ff',
           '#c71585',
-        ],
-        systems: [
-          { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
-            diceResults: [
-              { key: 'critical', name: '決定的成功' },
-              { key: 'famble', name: '致命的失敗' },
-              { key: 'special', name: 'スペシャル' },
-              { key: 'success', name: '成功' },
-              { key: 'failed', name: '失敗' }
-            ],
-            diceTypes: [
-              { resultKey: 'critical', name: '決定的成功', class: 'success' },
-              { resultKey: 'famble', name: '致命的失敗', class: 'failed' },
-              { resultKey: 'special', name: 'スペシャル', class: 'success' },
-              { resultKey: 'success', name: '成功', class: 'success' },
-              { resultKey: 'success', name: '部分的成功', class: 'success' },
-              { resultKey: 'failed', name: '失敗', class: 'failed' },
-              { resultKey: 'failed', name: '故障', class: 'failed' },
-            ]
-          },
-          // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
-          { key: 'emoklore', prefix: '【エモクロア】', name: 'エモクロアTRPG', diceText: 'Emoklore',
-            diceResults: [
-              { key: 'catastrophe', name: 'カタストロフ' },
-              { key: 'miracle', name: 'ミラクル' },
-              { key: 'triple', name: 'トリプル' },
-              { key: 'double', name: 'ダブル' },
-              { key: 'success', name: 'シングル' },
-              { key: 'failed', name: '失敗' },
-              { key: 'famble', name: 'ファンブル' }
-            ],
-            diceTypes: [
-              { resultKey: 'catastrophe', name: 'カタストロフ!', class: 'success'  },
-              { resultKey: 'miracle', name: 'ミラクル!', class: 'success'  },
-              { resultKey: 'triple', name: 'トリプル!', class: 'success'  },
-              { resultKey: 'double', name: 'ダブル!', class: 'success'  },
-              { resultKey: 'success', name: '成功!', class: 'success'  },
-              { resultKey: 'failed', name: '失敗!', class: 'failed' },
-              { resultKey: 'famble', name: 'ファンブル!', class: 'failed' }
-            ]
-          },
-          { key: 'insane', prefix: '【インセイン】', name: 'インセイン', diceText: 'Insane',
-            diceResults: [
-              { key: 'special', name: 'スペシャル' },
-              { key: 'success', name: '成功' },
-              { key: 'failed', name: '失敗' },
-              { key: 'famble', name: 'ファンブル' }
-            ],
-            diceTypes: [
-              { resultKey: 'famble', name: 'ファンブル', class: 'failed' },
-              { resultKey: 'special', name: 'スペシャル', class: 'success' },
-              { resultKey: 'success', name: '成功', class: 'success' },
-              { resultKey: 'failed', name: '失敗', class: 'failed' },
-            ]
-          },
-          { key: 'shinobigami', prefix: '【シノビガミ】', name: 'シノビガミ', diceText: 'ShinobiGami',
-            diceResults: [
-              { key: 'special', name: 'スペシャル' },
-              { key: 'success', name: '成功' },
-              { key: 'failed', name: '失敗' },
-              { key: 'famble', name: 'ファンブル' }
-            ],
-            diceTypes: [
-              { resultKey: 'famble', name: 'ファンブル', class: 'failed' },
-              { resultKey: 'special', name: 'スペシャル', class: 'success' },
-              { resultKey: 'success', name: '成功', class: 'success' },
-              { resultKey: 'failed', name: '失敗', class: 'failed' },
-            ]
-          },
-          { key: 'other', prefix: '', name: 'その他', diceText: '', diceResults: [], diceTypes: []}
         ],
         system: {},
         selectedDiceResult: '',
@@ -258,6 +184,10 @@
     props: {
     },
     methods: {
+      // システムを選択
+      selectSystem(val) {
+        this.ccfoliaLog.system = val;
+      },
       // 行を追加
       addRow(index) {
         this.ccfoliaLog.rows.splice(index, 0, LogRow.fromObject({ is_divider: true, name: '', body: '', key: this.dividerRows.length }));
