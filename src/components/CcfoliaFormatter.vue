@@ -34,38 +34,12 @@
           @changeLinkColor="changeLinkColor"
           @changeTitle="changeTitle"
         />
-        <el-card shadow="never" class="mb-3">
-          <div slot="header" class="clearfix">
-            <span>タブ設定  <el-tooltip
-              effect="dark"  placement="top-start">
-              <div slot="content">出力するタブを設定できます。<br/>雑談、情報以外のタブの色の設定ができます。<br/>左側がラインの色、右側が背景色です。</div>
-              <el-button icon="el-icon-question" type="text"></el-button>
-            </el-tooltip></span>
-          </div>
-          <small>チェックの入っているタブが出力されます。</small>
-          <el-checkbox-group v-model="selectedOutputTabs">
-            <el-checkbox label="メイン"></el-checkbox>
-            <el-checkbox label="情報"></el-checkbox>
-            <el-checkbox label="雑談"></el-checkbox>
-            <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
-          </el-checkbox-group>
-          <el-checkbox v-model="isHideSecretDice" label="シークレットダイスを隠す" border size="small"></el-checkbox>
-          <el-divider v-if="ccfoliaLog.tabs.length > 0"></el-divider>
-          <div class="mb-2" v-if="ccfoliaLog.tabs.length > 0">色設定</div>
-          <div v-for="tab in ccfoliaLog.tabs" :key="tab.name" v-show="selectedOutputTabs.includes(tab.name)">
-            <el-color-picker
-              v-model="tab.line_color"
-              :predefine="predefineColors">
-            </el-color-picker>
-            <el-color-picker
-              v-model="tab.background_color"
-              :predefine="predefineColors">
-            </el-color-picker>
-            <div class="mb-3" :style="`font-size:13px;background-color:${tab.background_color};border-left:solid 2px ${tab.line_color};`">
-              <div class="p-2">{{tab.name}}</div>
-            </div>
-          </div>
-        </el-card>
+        <tab-setting
+          :ccfoliaLog="ccfoliaLog"
+          :initialSelectedOutputTabs="selectedOutputTabs"
+          :inisitalIsHideSecretDice="isHideSecretDice"
+          @changeIsHideSecretDice="changeIsHideSecretDice"
+        />
         <el-card shadow="never" class="mb-4" :body-style="{height:'95vh', 'overflow-y':'scroll'}">
           <div slot="header" class="clearfix">
             <span>ログ全文  <el-tooltip
@@ -114,6 +88,7 @@
   import SystemForm from './SystemForm.vue';
   import DiceResult from './DiceResult.vue';
   import HeaderSetting from './HeaderSetting.vue';
+  import TabSetting from './TabSetting.vue';
   import Histories from './Histories.vue';
   import CcfoliaLog from '../classes/ccfolia_log';
   import LogRow from '../classes/log_row';
@@ -123,7 +98,7 @@
     name: "CcfoliaFormatter",
     mixins: [common],
     components: {
-      draggable, SystemForm, DiceResult, HeaderSetting, Histories,
+      draggable, SystemForm, DiceResult, HeaderSetting, TabSetting, Histories,
     },
     data() {
       return {
@@ -159,6 +134,10 @@
       // タイトルを変更
       changeTitle(val) {
         this.ccfoliaLog.title = val;
+      },
+      // シークレットダイスを隠すかどうかを変更
+      changeIsHideSecretDice(val) {
+        this.isHideSecretDice = val;
       },
       // 行を追加
       addRow(index) {
