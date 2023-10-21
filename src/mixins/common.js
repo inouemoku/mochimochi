@@ -81,5 +81,13 @@ export default {
         { key: 'other', prefix: '', name: 'その他', diceText: '', diceResults: [], diceTypes: []}
       ],
     }
-  }
+  },
+  methods: {
+    backgroundColor(tabName) {
+      if(tabName == "メイン") return "#ffffff";
+      if(tabName == "雑談") return "#f7f7f7";
+      if(tabName == "情報") return "#fafafa";
+      return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
+    },
+  },
 }
