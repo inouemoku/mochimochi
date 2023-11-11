@@ -172,19 +172,23 @@
             return;
           }
           const mochi = doc.getElementsByClassName('main');
-          if(mochi.length > 0) {
-            self.analyzeHtmlMochiMochi(doc);
-          } else {
-            self.analyzeHtmlCcfolia(doc);
-          }
+          const { ccfoliaLog, names, selectedNameTabs, uniqTabs } = mochi.length > 0
+            ? self.analyzeHtmlMochiMochi(doc)
+            : self.analyzeHtmlCcfolia(doc);
+          
+          self.ccfoliaLog = ccfoliaLog;
+          self.names = names;
+          self.selectedNameTabs = selectedNameTabs;
+          self.selectedOutputTabs = uniqTabs;
           console.log('onload end')
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
       },
       // ココフォリアから出力したログを解析する
       analyzeHtmlCcfolia(doc) {
+        let ccfoliaLog = CcfoliaLog.fromObject();
         const ptags = Array.from(doc.getElementsByTagName('p'));
-        this.ccfoliaLog.rows = ptags.map((p) => {
+        ccfoliaLog.rows = ptags.map((p) => {
           const { isOneline, diceType, isSecret } = this.diceType(p.children[2].innerHTML);
           const row = {
             color: p.outerHTML.match(/<p style="color:(.*);">/)[1],
@@ -197,7 +201,7 @@
           };
           return LogRow.fromObject(row);
         });
-        const { names, selectedNameTabs } = this.ccfoliaLog.rows.filter(x => x.dice_type != null)
+        const { names, selectedNameTabs } = ccfoliaLog.rows.filter(x => x.dice_type != null)
           .reduce(({ names, selectedNameTabs }, x) => {
             if (!names.includes(x.name)) {
               names.push(x.name);
@@ -205,9 +209,7 @@
             }
             return { names, selectedNameTabs };
           }, { names: [], selectedNameTabs: [] });
-        this.names = names;
-        this.selectedNameTabs = selectedNameTabs;
-        const uniqTabs = [...new Set(this.ccfoliaLog.rows.map(x => x.tab_name))];
+        const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.tab_name))];
         const dayLine = LogRow.fromObject({
           key: 0,
           is_divider: true,
@@ -215,33 +217,33 @@
           body: '1日目',
         });
         const tabs = uniqTabs.reduce((result, x) => {
-          if (x != 'メイン' && x != '雑談' && x != '情報') result.push(this.tabColors(x));
+          if (x != 'メイン' && x != '雑談' && x != '情報') result.push(this.tabColors(ccfoliaLog.rows, x));
           return result;
         }, []);
-        this.selectedOutputTabs = uniqTabs;
-        this.ccfoliaLog.rows = [dayLine].concat(this.ccfoliaLog.rows);
-        this.ccfoliaLog.tabs = tabs;
+        ccfoliaLog.rows = [dayLine].concat(ccfoliaLog.rows);
+        ccfoliaLog.tabs = tabs;
+        return { ccfoliaLog, names, selectedNameTabs, uniqTabs }
       },
       // MochiMochiで整形したログを解析する
       analyzeHtmlMochiMochi(doc) {
+        let ccfoliaLog = CcfoliaLog.fromObject();
         const header = Array.from(doc.getElementById('header').children);
-        this.ccfoliaLog.title = header[0].innerText;
+        ccfoliaLog.title = header[0].innerText;
         const menus = Array.from(header[1].children).map((menu) => {
           return { key: menu.hash.slice(1), name: menu.innerText }
         });
-        console.log(doc.getElementsByClassName('main')[0].children)
         const tags = Array.from(doc.getElementsByClassName('main')[0].children);
         const style = doc.getElementsByTagName('style')[0].innerText;
         const css = this.parseCssToObject(style)
         // ヘッダー背景色
         const headerColor = css.find(c => c.key == '#header').contents.background.match(/linear-gradient\((#.*),(#.*)\)/)
-        this.ccfoliaLog.header_color1 = headerColor[1];
-        this.ccfoliaLog.header_color2 = headerColor[2];
+        ccfoliaLog.header_color1 = headerColor[1];
+        ccfoliaLog.header_color2 = headerColor[2];
         // RGBを16進数に変換
         const rgbTo16 = function(col) {
           return "#" + col.match(/\d+/g).map(function(a){return ("0" + parseInt(a).toString(16)).slice(-2)}).join("");
         }
-        this.ccfoliaLog.rows = tags.map((tag) => {
+        ccfoliaLog.rows = tags.map((tag) => {
           if(tag.className == "day-line") return;
           if(tag.className == "day") {
             const key = tag.id.slice(3);
@@ -267,7 +269,7 @@
           };
           return LogRow.fromObject(row);
         }).filter(e => e);
-        const { names, selectedNameTabs } = this.ccfoliaLog.rows.filter(x => x.dice_type != null)
+        const { names, selectedNameTabs } = ccfoliaLog.rows.filter(x => x.dice_type != null)
           .reduce(({ names, selectedNameTabs }, x) => {
             if (!names.includes(x.name)) {
               names.push(x.name);
@@ -275,9 +277,7 @@
             }
             return { names, selectedNameTabs };
           }, { names: [], selectedNameTabs: [] });
-        this.names = names;
-        this.selectedNameTabs = selectedNameTabs;
-        const uniqTabs = [...new Set(this.ccfoliaLog.rows.map(x => x.tab_name))].filter(e => e);
+        const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.tab_name))].filter(e => e);
         var index = 0;
         const tabs = uniqTabs.reduce((result, x) => {
           if (x != 'メイン' && x != '雑談' && x != '情報') {
@@ -285,13 +285,12 @@
             const lineColor = content['border-left'].match(/.*(#.*)/)[1]
             const backgroundColor = content['background-color']
             index = index + 1;
-            result.push(this.tabColors(x, lineColor, backgroundColor));
+            result.push(this.tabColors(ccfoliaLog.rows, x, lineColor, backgroundColor));
           }
           return result;
         }, []);
-        this.selectedOutputTabs = uniqTabs;
-        this.ccfoliaLog.tabs = tabs;
-        console.log(this.ccfoliaLog.tabs);
+        ccfoliaLog.tabs = tabs;
+        return { ccfoliaLog, names, selectedNameTabs, uniqTabs }
       },
       htmlSpecialChars(unsafeText){
         var text = document.createTextNode(unsafeText);
@@ -349,12 +348,12 @@
         return resultObject;
       },
       // タブの色を決める
-      tabColors(name, lineColor = null, backgroundColor = null) {
+      tabColors(rows, name, lineColor = null, backgroundColor = null) {
         if(lineColor != null && backgroundColor != null) {
           return { name, line_color: lineColor, background_color: backgroundColor };
         }
         // KP, GM, DLを含む発言者は判定に使用しない
-        const filteredRows = this.ccfoliaLog.rows.filter(x => !x.is_divider && x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
+        const filteredRows = rows.filter(x => !x.is_divider && x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
         console.log(filteredRows)
         if (filteredRows.length === 0) {
           return { name, line_color: '#aaa', background_color: '#f7f7f7' };
