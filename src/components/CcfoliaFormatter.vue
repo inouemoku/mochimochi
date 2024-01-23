@@ -87,6 +87,7 @@
         selectedOutputTabs: [],
         names: [],
         isHideSecretDice: false,
+        filename: '',
       }
     },
     props: {
@@ -122,13 +123,11 @@
       },
       // 整形
       postCcfoliaLog(){
-        const filename = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1_整形.html');
-        this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs, this.isHideSecretDice), filename, 'text/html');
+        this.downloadBlob(this.ccfoliaLog.format(this.selectedOutputTabs, this.isHideSecretDice), this.filename.replace(/^(.*).html$/, '$1_整形.html'), 'text/html');
       },
       // 元の形式でダウンロード
       postOriginalCcfoliaLog(){
-        const filename = this.ccfoliaLog.file.name;
-        this.downloadBlob(this.ccfoliaLog.notFormat(this.selectedOutputTabs, this.isHideSecretDice), filename, 'text/html');
+        this.downloadBlob(this.ccfoliaLog.notFormat(this.selectedOutputTabs, this.isHideSecretDice), this.filename, 'text/html');
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
@@ -136,6 +135,7 @@
         this.system = this.systems.find(x => x.key == this.ccfoliaLog.system);
         const title = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1').replace(/^(.*)\[all\]$/, '$1');
         this.ccfoliaLog.title = `${this.system.prefix}${title}`
+        this.filename = this.ccfoliaLog.file.name;
         this.analyzeHtml();
       },
       // ダウンロードリンクを作成しファイルをダウンロードする
