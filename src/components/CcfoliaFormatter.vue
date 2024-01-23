@@ -310,7 +310,7 @@
       diceTypeMochi(text) {
         if(text.children[1] == null) return null;
         const diceType = text.children[1].classList[1];
-        if(diceType == null) return null;
+        if(diceType == null) return 'dice';
         return diceType;
       },
       // CSSの文字列をオブジェクトに変換する
