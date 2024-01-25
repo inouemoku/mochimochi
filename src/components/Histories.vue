@@ -1,11 +1,12 @@
 <template>
   <div>
     <small>
-      <div>最終更新: 2024-01-23 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2024-01-25 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
+        <li>2024-01-25 選択したタブ以外も出力されてしまうのを修正</li>
         <li>2024-01-23 整形したログを整形するとダイス表示がおかしくなるのを修正</li>
         <li>2023-09-11 タブごとに行をまとめる時に他のタブも巻き込めるように変更</li>
         <li>2023-06-19 整形したログを再度読み込めるように変更</li>

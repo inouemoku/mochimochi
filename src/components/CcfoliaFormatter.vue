@@ -39,6 +39,7 @@
           :initialSelectedOutputTabs="selectedOutputTabs"
           :inisitalIsHideSecretDice="isHideSecretDice"
           @changeIsHideSecretDice="changeIsHideSecretDice"
+          @changeSelectedOutputTabs="changeSelectedOutputTabs"
         />
         <log-editor
           :initialCcfoliaLog="ccfoliaLog"
@@ -116,6 +117,11 @@
       // シークレットダイスを隠すかどうかを変更
       changeIsHideSecretDice(val) {
         this.isHideSecretDice = val;
+      },
+      // 出力するタブを変更
+      changeSelectedOutputTabs(val) {
+        console.log(val)
+        this.selectedOutputTabs = val;
       },
       // ログを変更
       changeCcfoliaLog(val) {

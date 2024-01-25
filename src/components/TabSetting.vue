@@ -64,7 +64,7 @@
         this.selectedOutputTabs = val;
       },
       selectedOutputTabs: function(val) {
-        this.$emit('selectOutputTabs', val);
+        this.$emit('changeSelectedOutputTabs', val);
       },
       isHideSecretDice: function(val) {
         this.$emit('changeIsHideSecretDice', val);
