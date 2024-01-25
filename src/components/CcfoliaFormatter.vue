@@ -120,7 +120,6 @@
       },
       // 出力するタブを変更
       changeSelectedOutputTabs(val) {
-        console.log(val)
         this.selectedOutputTabs = val;
       },
       // ログを変更
