@@ -24,10 +24,10 @@
           :ccfoliaLog="ccfoliaLog"
         />
         <header-setting
+          ref="headerSetting"
           :initialHeaderColor1="ccfoliaLog.header_color1"
           :initialHeaderColor2="ccfoliaLog.header_color2"
           :initialLinkColor="ccfoliaLog.link_color"
-          :initialTitle="ccfoliaLog.title"
           :dividerRows="dividerRows"
           @changeHeaderColor1="changeHeaderColor1"
           @changeHeaderColor2="changeHeaderColor2"
@@ -139,7 +139,7 @@
         this.ccfoliaLog.file = file;
         this.system = this.systems.find(x => x.key == this.ccfoliaLog.system);
         const title = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1').replace(/^(.*)\[all\]$/, '$1');
-        this.ccfoliaLog.title = `${this.system.prefix}${title}`
+        this.$refs.headerSetting.title = `${this.system.prefix}${title}`;
         this.filename = this.ccfoliaLog.file.name;
         this.analyzeHtml();
       },

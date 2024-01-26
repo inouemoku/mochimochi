@@ -46,10 +46,6 @@
         type: String,
         default: ""
       },
-      initialTitle: {
-        type: String,
-        default: ""
-      },
       dividerRows: {
         type: Array,
         default: () => []
@@ -60,7 +56,7 @@
         headerColor1: this.initialHeaderColor1,
         headerColor2: this.initialHeaderColor2,
         linkColor: this.initialLinkColor,
-        title: this.initialTitle,
+        title: '',
       }
     },
     watch: {
