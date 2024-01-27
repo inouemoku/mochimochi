@@ -261,6 +261,7 @@
             return dayLine;
           }
           const diceTypeM =  this.diceTypeMochi(tag.children[1]);
+          console.log('diceTypeM',diceTypeM)
           const body = diceTypeM == null ? tag.children[1].innerHTML : this.htmlSpecialChars(`${tag.children[1].innerText}`);
           const { isOneline, diceType, isSecret } = this.diceType(body);
           const row = {
@@ -314,6 +315,7 @@
       // ダイスタイプを取得する
       diceTypeMochi(text) {
         if(text.children[1] == null) return null;
+        if(text.children[1].nodeName == 'BR') return null;
         const diceType = text.children[1].classList[1];
         if(diceType == null) return 'dice';
         return diceType;
@@ -389,7 +391,10 @@
         const isSecret = /\n\s*[sS]/.test(body);
         const isOneline = !/.*${system.diceText} :.*＞.*/.test(body);
         const isDiceRoll = body.match(/(.*)\((.*)\)(.*)＞ (.*)/);
+        console.log('oneline?')
         if (isOneline) {
+          console.log(body)
+          console.log(isDiceRoll)
           const regO = new RegExp(`.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
           const rowO = body.match(regO);
           if (rowO) {

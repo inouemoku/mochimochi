@@ -1,11 +1,12 @@
 <template>
   <div>
     <small>
-      <div>最終更新: 2024-01-26 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
+      <div>最終更新: 2024-01-27 <el-button @click="drawer=true" type="text" size="small">履歴</el-button></div>
       <div class="mb-4">Twitter: <a href="https://twitter.com/inouemoku" target="_blank">@inouemoku</a></div>
     </small>
     <el-drawer title="履歴" :visible.sync="drawer">
       <ul style="font-size:0.9em;">
+        <li>2024-01-27 整形したログを読み込んだ時に複数の改行があると消去されてしまうのを修正</li>
         <li>2024-01-26 タイトルが反映されないのを修正</li>
         <li>2024-01-25 選択したタブ以外も出力されてしまうのを修正</li>
         <li>2024-01-23 整形したログを整形するとダイス表示がおかしくなるのを修正</li>
