@@ -107,6 +107,13 @@
         if(this.attractFrom == null || index < this.attractFrom || this.ccfoliaLog.rows[index].tab_name != this.ccfoliaLog.rows[this.attractFrom].tab_name) return null;
         return 'primary';
       },
+      // 行の背景色
+      backgroundColor(tabName) {
+        if(tabName == "メイン") return "#ffffff";
+        if(tabName == "雑談") return "#f7f7f7";
+        if(tabName == "情報") return "#fafafa";
+        return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
+      },
     },
     watch: {
       initialCcfoliaLog: function(val) {
