@@ -11,7 +11,7 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="visible = false">キャンセル</el-button>
-        <el-button type="primary" @click="clickAddButton">選択範囲をログの末尾に追加する</el-button>
+        <el-button type="primary" :disabled="beforeIndex == null" @click="clickAddButton">選択範囲をログの末尾に追加する</el-button>
       </span>
     </el-dialog>
   </div>
@@ -41,6 +41,12 @@
       }
     },
     methods: {
+      // リセットする
+      reset() {
+        this.fromIndex = null;
+        this.toIndex = null;
+        this.beforeIndex = null;
+      },
       // 範囲選択ボタンをクリック
       select(index) {
         const beforeIndex = this.beforeIndex;
@@ -72,6 +78,9 @@
       initialCcfoliaLog: function(val) {
         this.ccfoliaLog = val;
       },
+      visible() {
+        this.reset();
+      }
     },
   }
 </script>

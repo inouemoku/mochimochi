@@ -53,6 +53,7 @@
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
         </el-upload>
+        <div v-show="ccfoliaLog.rows.length > 0">もう一度ファイルを読み込むとログを追加できます。</div>
       </el-form-item>
       <el-tooltip placement="top-start">
         <div slot="content">ヘッダーやタブなど全ての設定が反映されます。</div>

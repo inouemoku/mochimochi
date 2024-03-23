@@ -13,6 +13,7 @@
         <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
           <el-button size="mini" @click="addRow(index)">+</el-button>
           <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom)" @click="attract(index)"></el-button>
+          <el-button size="mini" @click="removeRowConfirm(index, `[${row.tab_name}] ${row.name}： ${row.body}`)" icon="el-icon-delete" />
           [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
         </div>
         <div v-if="row.is_divider">
@@ -26,6 +27,15 @@
         </div>
       </div>
     </draggable>
+    <el-dialog
+      :visible.sync="visibleRemoveRow">
+      <div class="mb-3">{{ removeText }}</div>
+      <span>を削除しますか？</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="visibleRemoveRow = false">キャンセル</el-button>
+        <el-button type="danger" @click="removeRow(removeIndex)">削除する</el-button>
+      </span>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -59,6 +69,9 @@
         ccfoliaLog: this.initialCcfoliaLog,
         attractFrom: null,
         dogs: [],
+        visibleRemoveRow: false,
+        removeIndex: null,
+        removeText: null,
       }
     },
     methods: {
@@ -69,6 +82,13 @@
       // 行を削除
       removeRow(index) {
         this.ccfoliaLog.rows.splice(index, 1);
+        this.visibleRemoveRow = false;
+      },
+      // 行削除確認モーダルを表示
+      removeRowConfirm(index, text) {
+        this.removeIndex = index;
+        this.removeText = text;
+        this.visibleRemoveRow = true;
       },
       // 結合
       attract(attractEnd) {
