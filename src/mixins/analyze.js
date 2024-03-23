@@ -174,7 +174,6 @@ export default {
       }
       // KP, GM, DLを含む発言者は判定に使用しない
       const filteredRows = rows.filter(x => !x.is_divider && x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
-      console.log(filteredRows)
       if (filteredRows.length === 0) {
         return { name, line_color: '#aaa', background_color: '#f7f7f7' };
       }
@@ -205,8 +204,6 @@ export default {
       const isOneline = !/.*${system.diceText} :.*＞.*/.test(body);
       const isDiceRoll = body.match(/(.*)\((.*)\)(.*)＞ (.*)/);
       if (isOneline) {
-        console.log(body)
-        console.log(isDiceRoll)
         const regO = new RegExp(`.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
         const rowO = body.match(regO);
         if (rowO) {

@@ -4,17 +4,6 @@
       <system-form
         @select="selectSystem"
       />
-      <el-form-item prop="file">
-        <el-upload
-          drag
-          action=""
-          :auto-upload="false"
-          :on-change="handleChangeFile"
-          >
-          <i class="el-icon-upload"></i>
-          <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
-        </el-upload>
-      </el-form-item>
       <div v-show="ccfoliaLog.rows.length > 0">
         <dice-result
           :visible="ccfoliaLog.system != 'other'"
@@ -47,15 +36,32 @@
           :dividerRows="dividerRows"
           @changeCcfoliaLog="changeCcfoliaLog"
         />
+        <log-seconds
+          ref="logSeconds"
+          :initialCcfoliaLog="ccfoliaLogSecond"
+          @addSelected="addSelected"
+        ></log-seconds>
       </div>
-        <el-tooltip placement="top-start">
-          <div slot="content">ヘッダーやタブなど全ての設定が反映されます。</div>
-          <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
-        </el-tooltip>
-        <el-tooltip placement="top-start">
-          <div slot="content">タブとシークレットダイスの設定だけ反映されます。</div>
-          <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button>
-        </el-tooltip>
+      <el-form-item prop="file">
+        <el-upload
+          drag
+          action=""
+          :auto-upload="false"
+          :on-change="handleChangeFile"
+          :file-list="fileList"
+          >
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">Drop file here or <em>click to upload</em></div>
+        </el-upload>
+      </el-form-item>
+      <el-tooltip placement="top-start">
+        <div slot="content">ヘッダーやタブなど全ての設定が反映されます。</div>
+        <el-button class="px-5" @click="postCcfoliaLog" type="primary" :disabled="ccfoliaLog.rows.length <= 0">整形！</el-button>
+      </el-tooltip>
+      <el-tooltip placement="top-start">
+        <div slot="content">タブとシークレットダイスの設定だけ反映されます。</div>
+        <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button>
+      </el-tooltip>
     </el-form>
     <el-divider></el-divider>
     <histories></histories>
@@ -68,6 +74,7 @@
   import HeaderSetting from './HeaderSetting.vue';
   import TabSetting from './TabSetting.vue';
   import LogEditor from './LogEditor.vue';
+  import LogSeconds from './LogSeconds.vue';
   import Histories from './Histories.vue';
   import CcfoliaLog from '../classes/ccfolia_log';
   import analyze from '../mixins/analyze';
@@ -77,18 +84,24 @@
     name: "CcfoliaFormatter",
     mixins: [analyze, common],
     components: {
-      SystemForm, DiceResult, HeaderSetting, TabSetting, LogEditor, Histories,
+      SystemForm, DiceResult, HeaderSetting, TabSetting, LogEditor, LogSeconds, Histories,
         
     },
     data() {
       return {
         ccfoliaLog: CcfoliaLog.fromObject(),
+        ccfoliaLogSecond: CcfoliaLog.fromObject(),
         system: {},
         selectedNameTabs: [],
+        selectedNameTabsSecond: [],
         selectedOutputTabs: [],
+        selectedOutputTabsSecond: [],
         names: [],
+        namesSecond: [],
         isHideSecretDice: false,
         filename: '',
+        visibleSecondsDialog: false,
+        fileList: [],
       }
     },
     props: {
@@ -136,12 +149,35 @@
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {
+        this.fileList = [];
+        if (this.ccfoliaLog.rows.length == 0) {
+          this.handleChangeFileFirst(file);
+        } else {
+          this.handleChangeFileSeconds(file);
+        }
+      },
+      // 初めてファイルが追加された時のアクション
+      handleChangeFileFirst(file) {
         this.ccfoliaLog.file = file;
         this.system = this.systems.find(x => x.key == this.ccfoliaLog.system);
         const title = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1').replace(/^(.*)\[all\]$/, '$1');
         this.$refs.headerSetting.title = `${this.system.prefix}${title}`;
         this.filename = this.ccfoliaLog.file.name;
-        this.analyzeHtml();
+        this.analyzeHtmlFirst();
+      },
+      // おかわりファイルが追加された時のアクション
+      handleChangeFileSeconds(file) {
+        this.resetSeconds();
+        this.ccfoliaLogSecond.file = file;
+        this.analyzeHtmlSeconds();
+        this.$refs.logSeconds.visible = true;
+      },
+      // おかわり用変数のリセット
+      resetSeconds() {
+        this.ccfoliaLogSecond = CcfoliaLog.fromObject();
+        this.selectedNameTabsSecond = [];
+        this.selectedOutputTabsSecond = [];
+        this.namesSecond = [];
       },
       // ダウンロードリンクを作成しファイルをダウンロードする
       downloadBlob(blob, fileName, fileType) {
@@ -160,8 +196,8 @@
           linkEl.parentNode.removeChild(linkEl);
         }
       },
-      // ログHTMLを解析する
-      analyzeHtml() {
+      // 初回用ログHTMLを解析する
+      analyzeHtmlFirst() {
         const fileReader = new FileReader();
         const self = this;
         fileReader.onload = function() {
@@ -189,6 +225,52 @@
         }
         fileReader.readAsText(this.ccfoliaLog.file.raw);
       },
+      // おかわり用ログHTMLを解析する
+      analyzeHtmlSeconds() {
+        const fileReader = new FileReader();
+        const self = this;
+        fileReader.onload = function() {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(fileReader.result, "text/html");
+          const parsererror = doc.getElementsByTagName('parsererror');
+          if (parsererror.length > 0) {
+            self.$message({
+              type: 'error',
+              message: 'ファイルの解析に失敗しました',
+            });
+            console.log(parsererror);
+            return;
+          }
+          const mochi = doc.getElementsByClassName('main');
+          const { ccfoliaLog, names, selectedNameTabs, uniqTabs } = mochi.length > 0
+            ? self.analyzeHtmlMochiMochi(doc)
+            : self.analyzeHtmlCcfolia(doc);
+          
+          self.ccfoliaLogSecond = ccfoliaLog;
+          self.namesSecond = names;
+          self.selectedNameTabsSecond = selectedNameTabs;
+          self.selectedOutputTabsSecond = uniqTabs;
+          console.log('onload end')
+        }
+        fileReader.readAsText(this.ccfoliaLogSecond.file.raw);
+      },
+      // おかわりを追加
+      addSelected(indexes) {
+        const fromIndex = indexes[0];
+        const toIndex = indexes[1];
+        console.log(this.names, this.namesSecond)
+        this.names = this.concatSeconds(this.names, this.namesSecond);
+        this.selectedNameTabs = this.concatSeconds(this.selectedNameTabs, this.selectedNameTabsSecond);
+        this.selectedOutputTabs = this.concatSeconds(this.selectedOutputTabs, this.selectedOutputTabsSecond);
+        const tabsSecond = this.ccfoliaLogSecond.tabs.filter(x => !this.ccfoliaLog.tabs.some(y => y.name == x.name))
+        this.ccfoliaLog.tabs = this.ccfoliaLog.tabs.concat(tabsSecond)
+        const filteredRows = this.ccfoliaLogSecond.rows.filter((_x, i) => fromIndex <= i && i <= toIndex);
+        this.ccfoliaLog.rows = this.ccfoliaLog.rows.concat(filteredRows);
+      },
+      concatSeconds(originalArray, secondArray) {
+        const second = secondArray.filter(x => !originalArray.some(y => y == x))
+        return originalArray.concat(second);
+      }
     },
     computed: {
       dividerRows: function() {
