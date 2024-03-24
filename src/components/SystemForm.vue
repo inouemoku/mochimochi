@@ -1,6 +1,6 @@
 <template>
   <el-form-item prop="system">
-    <el-select v-model="selectedSystem">
+    <el-select v-model="selectedSystem" style="width:250px">
       <el-option
         v-for="s in systems"
         :key="s.key"

@@ -11,7 +11,7 @@ export default {
         '#c71585',
       ],
       systems: [
-        { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG', diceText: 'Cthulhu',
+        { key: 'coc6', prefix: '【CoC】', name: 'クトゥルフ神話TRPG(6版)', diceText: 'Cthulhu',
           diceResults: [
             { key: 'critical', name: '決定的成功' },
             { key: 'famble', name: '致命的失敗' },
@@ -29,7 +29,28 @@ export default {
             { resultKey: 'failed', name: '故障', class: 'failed' },
           ]
         },
-        // { key: 'coc7', name: '新クトゥルフ神話TRPG' },
+        { key: 'coc7', prefix: '【CoC】', name: '新クトゥルフ神話TRPG(7版)', diceText: 'Cthulhu7th',
+          diceResults: [
+            { key: 'critical', name: 'クリティカル' },
+            { key: 'famble', name: 'ファンブル' },
+            { key: 'extreme_success', name: 'イクストリーム成功' },
+            { key: 'hard_success', name: 'ハード成功' },
+            { key: 'regular_success', name: 'レギュラー成功' },
+            { key: 'success', name: '成功' },
+            { key: 'failed', name: '失敗' },
+          ],
+          diceTypes: [
+            { resultKey: 'critical', name: 'クリティカル', class: 'success' },
+            { resultKey: 'famble', name: 'ファンブル', class: 'failed' },
+            { resultKey: 'extreme_success', name: 'イクストリーム成功', class: 'success' },
+            { resultKey: 'hard_success', name: 'ハード成功', class: 'success' },
+            { resultKey: 'regular_success', name: 'レギュラー成功', class: 'success' },
+            { resultKey: 'success', name: '成功', class: 'success' },
+            { resultKey: 'success', name: '部分的成功', class: 'success' },
+            { resultKey: 'failed', name: '失敗', class: 'failed' },
+            { resultKey: 'failed', name: '故障', class: 'failed' },
+          ]
+        },
         { key: 'emoklore', prefix: '【エモクロア】', name: 'エモクロアTRPG', diceText: 'Emoklore',
           diceResults: [
             { key: 'catastrophe', name: 'カタストロフ' },
