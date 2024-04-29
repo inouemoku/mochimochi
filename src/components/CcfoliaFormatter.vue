@@ -103,6 +103,7 @@
         filename: '',
         visibleSecondsDialog: false,
         fileList: [],
+        title: '',
       }
     },
     props: {
@@ -162,7 +163,7 @@
         this.ccfoliaLog.file = file;
         this.system = this.systems.find(x => x.key == this.ccfoliaLog.system);
         const title = this.ccfoliaLog.file.name.replace(/^(.*).html$/, '$1').replace(/^(.*)\[all\]$/, '$1');
-        this.$refs.headerSetting.title = `${this.system.prefix}${title}`;
+        this.title = `${this.system.prefix}${title}`;
         this.filename = this.ccfoliaLog.file.name;
         this.analyzeHtmlFirst();
       },
@@ -219,6 +220,10 @@
             : self.analyzeHtmlCcfolia(doc);
           
           self.ccfoliaLog = ccfoliaLog;
+          if(self.ccfoliaLog.title == '') {
+            self.ccfoliaLog.title = self.title;
+          }
+          self.$refs.headerSetting.reset(self.ccfoliaLog);
           self.names = names;
           self.selectedNameTabs = selectedNameTabs;
           self.selectedOutputTabs = uniqTabs;

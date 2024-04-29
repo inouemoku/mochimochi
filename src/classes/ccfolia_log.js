@@ -11,7 +11,7 @@ export default class CcfoliaLog {
     this._header_color1 = this.paramFromObject(ccfolia_log, 'header_color1', "#000");
     this._header_color2 = this.paramFromObject(ccfolia_log, 'header_color2', "#2E9BB1");
     this._link_color    = this.paramFromObject(ccfolia_log, 'link_color', "#fff");
-    this._title         = this.paramFromObject(ccfolia_log, 'title', '【CoC】タイトル');
+    this._title         = this.paramFromObject(ccfolia_log, 'title', '');
     this._tabs          = this.paramFromObject(ccfolia_log, 'tabs', []);
     this._doc           = '';
     if(ccfolia_log) {
@@ -108,6 +108,7 @@ export default class CcfoliaLog {
 
 
   format(selectedOutputTabs, isHideSecretDice) {
+    console.log(this.title)
     const dividers = this.rows.filter(x => x.is_divider);
     const menu_array = dividers.map((x) => `      <a href="#key${x.key}">${x.name}</a>`).join("\n");
     let tab_styles = '';

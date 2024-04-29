@@ -74,7 +74,6 @@ export default {
           return dayLine;
         }
         const diceTypeM =  this.diceTypeMochi(tag.children[1]);
-        console.log('diceTypeM',diceTypeM)
         const body = diceTypeM == null ? tag.children[1].innerHTML : this.htmlSpecialChars(`${tag.children[1].innerText}`);
         const { isOneline, diceType, isSecret } = this.diceType(body);
         const row = {

@@ -59,6 +59,14 @@
         title: '',
       }
     },
+    methods: {
+      reset(val) {
+        this.title = val.title;
+        this.headerColor1 = val.header_color1;
+        this.headerColor2 = val.header_color2;
+        this.linkColor = val.link_color;
+      },
+    },
     watch: {
       headerColor1(val) {
         this.$emit('changeHeaderColor1', val);
