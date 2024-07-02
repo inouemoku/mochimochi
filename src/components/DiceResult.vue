@@ -64,7 +64,7 @@
     },
     computed: {
       diceRows: function() {
-        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.selectedDiceTabs.includes(x.tab_name) && this.selectedNameTabs.includes(x.name));
+        return this.ccfoliaLog.rows.filter(x => x.dice_type && x.dice_type.resultKey == this.selectedDiceResult && this.isIncludeSelectedDiceTabs(x.tab_name) && this.selectedNameTabs.includes(x.name));
       }
     },
     watch: {
@@ -74,6 +74,16 @@
       initialSelectedNameTabs(val) {
         this.selectedNameTabs = val;
       }
+    },
+    methods: {
+      isIncludeSelectedDiceTabs(originalTabName) {
+        let tabName = originalTabName;
+        if(tabName == 'main') tabName = 'メイン';
+        if(tabName == 'info') tabName = '情報';
+        if(tabName == 'other') tabName = '雑談';
+        return this.selectedDiceTabs.includes(tabName);
+      }
+
     }
   }
 </script>
