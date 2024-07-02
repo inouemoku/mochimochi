@@ -7,6 +7,7 @@ export default class LogRow {
     this._key        = this.paramFromObject(log_row, 'key');
     this._color      = this.paramFromObject(log_row, 'color');
     this._tab_name   = this.paramFromObject(log_row, 'tab_name');
+    this._tab_type   = this.paramFromObject(log_row, 'tab_type');
     this._name       = this.paramFromObject(log_row, 'name');
     this._body       = this.paramFromObject(log_row, 'body');
     this._is_divider = this.paramFromObject(log_row, 'is_divider');
@@ -78,9 +79,9 @@ export default class LogRow {
   }
 
   class_name(tabs) {
-    if(this.tab_name == 'メイン' || this.tab_name == null || this.tab_name == '') return '';
-    if(this.tab_name == '雑談') return 'other';
-    if(this.tab_name == '情報') return 'info';
+    if(this.tab_name == 'メイン' || this.tab_name == 'main' || this.tab_name == null || this.tab_name == '') return '';
+    if(this.tab_name == '雑談' || this.tab_name == 'other') return 'other';
+    if(this.tab_name == '情報' || this.tab_name == 'info') return 'info';
     console.log(tabs)
     return `secret tab${tabs.findIndex(x => x.name == this.tab_name)}`
   }
@@ -117,6 +118,14 @@ export default class LogRow {
   get tab_name() { return this._tab_name; }
 
   set tab_name(value) { this._tab_name = value; }
+
+  /**
+   * タブタイプ
+   * @returns {string}
+   */
+  get tab_type() { return this._tab_type; }
+
+  set tab_type(value) { this._tab_type = value; }
 
   /**
    * 発言者名

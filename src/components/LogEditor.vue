@@ -129,9 +129,9 @@
       },
       // 行の背景色
       backgroundColor(tabName) {
-        if(tabName == "メイン") return "#ffffff";
-        if(tabName == "雑談") return "#f7f7f7";
-        if(tabName == "情報") return "#fafafa";
+        if(tabName == "メイン" || tabName == 'main') return "#ffffff";
+        if(tabName == "雑談" || tabName == 'other') return "#f7f7f7";
+        if(tabName == "情報" || tabName == 'info') return "#fafafa";
         return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
       },
     },

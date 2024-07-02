@@ -35,7 +35,7 @@ export default {
         body: '1日目',
       });
       const tabs = uniqTabs.reduce((result, x) => {
-        if (x != 'メイン' && x != '雑談' && x != '情報') result.push(this.tabColors(ccfoliaLog.rows, x));
+        if (x != 'メイン' && x != 'main' && x != '雑談' && x != 'other' && x != '情報' && x != 'info') result.push(this.tabColors(ccfoliaLog.rows, x));
         return result;
       }, []);
       ccfoliaLog.rows = [dayLine].concat(ccfoliaLog.rows);
@@ -98,7 +98,7 @@ export default {
       const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.tab_name))].filter(e => e);
       var index = 0;
       const tabs = uniqTabs.reduce((result, x) => {
-        if (x != 'メイン' && x != '雑談' && x != '情報') {
+        if (x != 'メイン' && x != 'main' && x != '雑談' && x != 'other' && x != '情報' && x != 'info') {
           const content = css.find(c => c.key == `.tab${index}`).contents;
           const lineColor = content['border-left'].match(/.*(#.*)/)[1]
           const backgroundColor = content['background-color']
