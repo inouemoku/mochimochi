@@ -26,7 +26,7 @@ export default class LogRow {
 `
     }
     // 出力選択されていないタブの行は飛ばす
-    if(!selectedOutputTabs.includes(this.tab_name)) return '';
+    if(!selectedOutputTabs.includes(this.replaced_tab_name)) return '';
 
     const body = this.formatBySystem(system, isHideSecretDice);
     return `      <div class="${this.class_name(tabs)}" style="color:${this.color};" tab-name="${this.htmlSpecialChars(this.tab_name)}">
@@ -118,6 +118,17 @@ export default class LogRow {
   get tab_name() { return this._tab_name; }
 
   set tab_name(value) { this._tab_name = value; }
+
+  /**
+   * 置換したタブ名
+   * @returns {string}
+   */
+  get replaced_tab_name() {
+    if(this._tab_name == 'main') return 'メイン';
+    if(this._tab_name == 'info') return '情報';
+    if(this._tab_name == 'other') return '雑談';
+    return this._tab_name;
+  }
 
   /**
    * タブタイプ

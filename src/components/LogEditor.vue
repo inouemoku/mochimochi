@@ -10,7 +10,7 @@
     </div>
     <draggable :options="{animation:200, handle:'.handle'}" :list="ccfoliaLog.rows">
       <div v-for="(row, index) in ccfoliaLog.rows" :key="index" class="my-1">
-        <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
+        <div v-if="!row.is_divider" v-show="selectedOutputTabs.includes(row.replaced_tab_name)" :style="`color:${row.color};background-color:${backgroundColor(row.tab_name)}`" class="draggable handle">
           <el-button size="mini" @click="addRow(index)">+</el-button>
           <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom)" @click="attract(index)"></el-button>
           <el-button size="mini" @click="removeRowConfirm(index, `[${row.tab_name}] ${row.name}： ${row.body}`)" icon="el-icon-delete" />

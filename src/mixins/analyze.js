@@ -27,7 +27,7 @@ export default {
           }
           return { names, selectedNameTabs };
         }, { names: [], selectedNameTabs: [] });
-      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.tab_name))];
+      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))];
       const dayLine = LogRow.fromObject({
         key: 0,
         is_divider: true,
@@ -95,7 +95,7 @@ export default {
           }
           return { names, selectedNameTabs };
         }, { names: [], selectedNameTabs: [] });
-      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.tab_name))].filter(e => e);
+      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))].filter(e => e);
       var index = 0;
       const tabs = uniqTabs.reduce((result, x) => {
         if (x != 'メイン' && x != 'main' && x != '雑談' && x != 'other' && x != '情報' && x != 'info') {
