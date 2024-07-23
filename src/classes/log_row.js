@@ -45,7 +45,7 @@ export default class LogRow {
 
   notFormat(selectedOutputTabs, isHideSecretDice) {
     // 出力選択されていないタブの行は飛ばす
-    if(!selectedOutputTabs.includes(this.tab_name)) return '';
+    if(!selectedOutputTabs.includes(this.replaced_tab_name)) return '';
     const body = (isHideSecretDice && this.is_secret) ? 'シークレットダイス' : this.body;
     
     return `    <p style="color:${this.color};">
