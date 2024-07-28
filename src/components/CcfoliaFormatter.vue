@@ -61,14 +61,13 @@
       </el-tooltip>
       <el-tooltip placement="top-start">
         <div slot="content">タブとシークレットダイスの設定だけ反映されます。</div>
-        <el-dropdown class="px-5" @click="postOriginalCcfoliaLog" @command="postOriginalCcfoliaLogConvert" split-button type="warning" :disabled="ccfoliaLog.rows.length <= 0">
+        <el-dropdown class="px-3" @click="postOriginalCcfoliaLog" @command="postOriginalCcfoliaLogConvert" split-button type="warning" :disabled="ccfoliaLog.rows.length <= 0">
           整形しないでダウンロード
           <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="japanese">タブ名をメイン/情報/雑談に変換する</el-dropdown-item>
-            <el-dropdown-item command="english">タブ名をmain/info/otherに変換する</el-dropdown-item>
+            <el-dropdown-item command="japanese">タブ名を [メイン] [情報] [雑談] に統一する</el-dropdown-item>
+            <el-dropdown-item command="english">タブ名を [main] [info] [other] に統一する</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-        <!-- <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button> -->
       </el-tooltip>
     </el-form>
     <el-divider></el-divider>
