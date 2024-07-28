@@ -61,7 +61,14 @@
       </el-tooltip>
       <el-tooltip placement="top-start">
         <div slot="content">タブとシークレットダイスの設定だけ反映されます。</div>
-        <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button>
+        <el-dropdown class="px-5" @click="postOriginalCcfoliaLog" @command="postOriginalCcfoliaLogConvert" split-button type="warning" :disabled="ccfoliaLog.rows.length <= 0">
+          整形しないでダウンロード
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item command="japanese">タブ名をメイン/情報/雑談に変換する</el-dropdown-item>
+            <el-dropdown-item command="english">タブ名をmain/info/otherに変換する</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+        <!-- <el-button class="px-5" @click="postOriginalCcfoliaLog" type="warning" :disabled="ccfoliaLog.rows.length <= 0">整形しないでダウンロード</el-button> -->
       </el-tooltip>
     </el-form>
     <el-divider></el-divider>
@@ -148,6 +155,11 @@
       // 元の形式でダウンロード
       postOriginalCcfoliaLog(){
         this.downloadBlob(this.ccfoliaLog.notFormat(this.selectedOutputTabs, this.isHideSecretDice), this.filename, 'text/html');
+      },
+      // 元の形式でタブを変換してダウンロード
+      postOriginalCcfoliaLogConvert(command){
+        console.log(command)
+        this.downloadBlob(this.ccfoliaLog.notFormat(this.selectedOutputTabs, this.isHideSecretDice, command), this.filename, 'text/html');
       },
       // ファイルが追加された時のアクション
       handleChangeFile(file) {

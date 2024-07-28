@@ -43,18 +43,24 @@ export default class LogRow {
     return p.innerHTML;
   }
 
-  notFormat(selectedOutputTabs, isHideSecretDice) {
+  notFormat(selectedOutputTabs, isHideSecretDice, tabLang = null) {
     // 出力選択されていないタブの行は飛ばす
     if(!selectedOutputTabs.includes(this.replaced_tab_name)) return '';
     const body = (isHideSecretDice && this.is_secret) ? 'シークレットダイス' : this.body;
     
     return `    <p style="color:${this.color};">
-      <span> [${this.tab_name}]</span>
+      <span> [${this.tabName(tabLang)}]</span>
       <span>${this.name}</span> :
       <span>${body}</span>
     </p>
     
 `
+  }
+
+  tabName(tabLang = null) {
+    if(tabLang == 'japanese') return this.replaced_tab_name;
+    if(tabLang == 'english') return this.replaced_eng_tab_name;
+    return this.tab_name;
   }
 
   formatBySystem(system, isHideSecretDice) {
@@ -127,6 +133,17 @@ export default class LogRow {
     if(this._tab_name == 'main') return 'メイン';
     if(this._tab_name == 'info') return '情報';
     if(this._tab_name == 'other') return '雑談';
+    return this._tab_name;
+  }
+
+  /**
+   * 英語に置換したタブ名
+   * @returns {string}
+   */
+  get replaced_eng_tab_name() {
+    if(this._tab_name == 'メイン') return 'main';
+    if(this._tab_name == '情報') return 'info';
+    if(this._tab_name == '雑談') return 'other';
     return this._tab_name;
   }
 

@@ -257,7 +257,7 @@ ${tab_styles}
 `
   }
 
-  notFormat(selectedOutputTabs, isHideSecretDice) {
+  notFormat(selectedOutputTabs, isHideSecretDice, tabLang = null) {
     return `<!DOCTYPE html>
 <html lang="ja">
   <head>
@@ -268,7 +268,7 @@ ${tab_styles}
   </head>
   <body>
     
-${this.rows.map(x => x.notFormat(selectedOutputTabs, isHideSecretDice)).join("")}  </body>
+${this.rows.map(x => x.notFormat(selectedOutputTabs, isHideSecretDice, tabLang)).join("")}  </body>
 </html>`
   }
 }
