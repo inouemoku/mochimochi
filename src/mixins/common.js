@@ -62,13 +62,13 @@ export default {
             { key: 'famble', name: 'ファンブル' }
           ],
           diceTypes: [
-            { resultKey: 'catastrophe', name: 'カタストロフ!', class: 'success'  },
-            { resultKey: 'miracle', name: 'ミラクル!', class: 'success'  },
-            { resultKey: 'triple', name: 'トリプル!', class: 'success'  },
-            { resultKey: 'double', name: 'ダブル!', class: 'success'  },
-            { resultKey: 'success', name: '成功!', class: 'success'  },
-            { resultKey: 'failed', name: '失敗!', class: 'failed' },
-            { resultKey: 'famble', name: 'ファンブル!', class: 'failed' }
+            { resultKey: 'catastrophe', name: '成功数[0-9]+ カタストロフ', class: 'success' },
+            { resultKey: 'miracle', name: '成功数[0-9]+ ミラクル', class: 'success'  },
+            { resultKey: 'triple', name: '成功数3 トリプル', class: 'success'  },
+            { resultKey: 'double', name: '成功数2 ダブル', class: 'success'  },
+            { resultKey: 'success', name: '成功数1 成功', class: 'success'  },
+            { resultKey: 'failed', name: '成功数0 失敗', class: 'failed' },
+            { resultKey: 'famble', name: '成功数-[0-9]+ ファンブル', class: 'failed' }
           ]
         },
         { key: 'insane', prefix: '【インセイン】', name: 'インセイン', diceText: 'Insane',

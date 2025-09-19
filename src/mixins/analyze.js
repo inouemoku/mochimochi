@@ -204,9 +204,14 @@ export default {
       const isDiceRoll = body.match(/(.*)\((.*)\)(.*)＞ (.*)/);
       if (isOneline) {
         const regO = new RegExp(`.*＞ (${system.diceTypes.map(x => x.name).join('|')})`)
+        // const regO = new RegExp(`.*＞ 成功数`)
         const rowO = body.match(regO);
         if (rowO) {
-          const diceType = system.diceTypes.find(d => d.name === rowO[1]);
+          console.log(body, rowO[1])
+          const diceType = system.diceTypes.find(d => {
+            const regO2 = new RegExp(d.name);
+            return !!rowO[1].match(regO2);
+          });
           return { isOneline: true, diceType, isSecret };
         }
         if (isDiceRoll) return { isOneline: true, diceType: null, isSecret };
