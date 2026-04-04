@@ -17,18 +17,24 @@
           :initialHeaderColor1="ccfoliaLog.header_color1"
           :initialHeaderColor2="ccfoliaLog.header_color2"
           :initialLinkColor="ccfoliaLog.link_color"
+          :initialDividerColor="ccfoliaLog.divider_color"
           :dividerRows="dividerRows"
           @changeHeaderColor1="changeHeaderColor1"
           @changeHeaderColor2="changeHeaderColor2"
           @changeLinkColor="changeLinkColor"
+          @changeDividerColor="changeDividerColor"
           @changeTitle="changeTitle"
         />
         <tab-setting
           :ccfoliaLog="ccfoliaLog"
           :initialSelectedOutputTabs="selectedOutputTabs"
           :inisitalIsHideSecretDice="isHideSecretDice"
+          :isChangeDefaultBodyColor="ccfoliaLog.is_change_default_body_color"
+          :defaultBodyColor="ccfoliaLog.default_body_color"
           @changeIsHideSecretDice="changeIsHideSecretDice"
           @changeSelectedOutputTabs="changeSelectedOutputTabs"
+          @changeIsChangeDefaultBodyColor="changeIsChangeDefaultBodyColor"
+          @changeDefaultBodyColor="changeDefaultBodyColor"
         />
         <log-editor
           :initialCcfoliaLog="ccfoliaLog"
@@ -130,6 +136,18 @@
       // リンク色を変更
       changeLinkColor(val) {
         this.ccfoliaLog.link_color = val;
+      },
+      // デフォルト文字色変更フラグを変更
+      changeIsChangeDefaultBodyColor(val) {
+        this.ccfoliaLog.is_change_default_body_color = val;
+      },
+      // デフォルト文字色を変更
+      changeDefaultBodyColor(val) {
+        this.ccfoliaLog.default_body_color = val;
+      },
+      // 見出し文字色を変更
+      changeDividerColor(val) {
+        this.ccfoliaLog.divider_color = val;
       },
       // タイトルを変更
       changeTitle(val) {

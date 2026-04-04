@@ -9,25 +9,43 @@
     </div>
     <small>チェックの入っているタブが出力されます。</small>
     <el-checkbox-group v-model="selectedOutputTabs">
-      <el-checkbox label="メイン"></el-checkbox>
-      <el-checkbox label="情報"></el-checkbox>
-      <el-checkbox label="雑談"></el-checkbox>
       <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
     </el-checkbox-group>
-    <el-checkbox v-model="isHideSecretDice" label="シークレットダイスを隠す" border size="small"></el-checkbox>
+    <div style="display: flex;">
+      <el-checkbox v-model="isHideSecretDice" label="シークレットダイスを隠す" border size="small"></el-checkbox>
+      <el-checkbox
+        :value="isChangeDefaultBodyColor"
+        @input="$emit('changeIsChangeDefaultBodyColor', $event)"
+        label="本文の文字色を設定する" border size="small" class="mr-2"
+      />
+      <el-color-picker
+        v-show="isChangeDefaultBodyColor"
+        size="small"
+        :value="defaultBodyColor"
+        @input="$emit('changeDefaultBodyColor', $event)"
+        :predefine="predefineColors">
+      </el-color-picker>
+    </div>
     <el-divider v-if="ccfoliaLog.tabs.length > 0"></el-divider>
     <div class="mb-2" v-if="ccfoliaLog.tabs.length > 0">色設定</div>
     <div v-for="tab in ccfoliaLog.tabs" :key="tab.name" v-show="selectedOutputTabs.includes(tab.name)">
+      <div class="inline-row">
       <el-color-picker
+        v-if="tab.name != 'メイン'"
         v-model="tab.line_color"
         :predefine="predefineColors">
       </el-color-picker>
       <el-color-picker
+        class="mr-2"
         v-model="tab.background_color"
         :predefine="predefineColors">
       </el-color-picker>
-      <div class="mb-3" :style="`font-size:13px;background-color:${tab.background_color};border-left:solid 2px ${tab.line_color};`">
-        <div class="p-2">{{tab.name}}</div>
+      <div class="small">
+        {{tab.name}} <span v-if="tab.name=='メイン'">（背景色のみ）</span>
+      </div>
+      </div>
+      <div class="mt-1 mb-3" :style="`font-size:13px;background-color:${tab.background_color};border-left:solid 2px ${tab.line_color};`">
+        <div class="p-2" :style="bodyStyle">{{tab.name}}</div>
       </div>
     </div>
   </el-card>
@@ -51,12 +69,27 @@
       inisitalIsHideSecretDice: {
         type: Boolean,
         default: false
+      },
+      isChangeDefaultBodyColor: {
+        type: Boolean,
+        default: false
+      },
+      defaultBodyColor: {
+        type: String,
+        default: ''
       }
     },
     data() {
       return {
         selectedOutputTabs: this.initialSelectedOutputTabs,
         isHideSecretDice: this.inisitalIsHideSecretDice,
+      }
+    },
+    computed: {
+      bodyStyle() {
+        return this.ccfoliaLog.is_change_default_body_color
+          ? { color: this.ccfoliaLog.default_body_color }
+          : {}
       }
     },
     watch: {

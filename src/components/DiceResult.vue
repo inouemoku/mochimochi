@@ -11,9 +11,6 @@
       <el-radio-button v-for="r in system.diceResults" :key="r.key" :label="r.key">{{ r.name }}</el-radio-button>
     </el-radio-group>
     <el-checkbox-group v-model="selectedDiceTabs">
-      <el-checkbox label="メイン"></el-checkbox>
-      <el-checkbox label="情報"></el-checkbox>
-      <el-checkbox label="雑談"></el-checkbox>
       <el-checkbox v-for="(tab, index) in ccfoliaLog.tabs" :key="index" :label="tab.name"></el-checkbox>
     </el-checkbox-group>
     <el-checkbox-group v-model="selectedNameTabs">

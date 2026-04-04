@@ -11,6 +11,9 @@ export default class CcfoliaLog {
     this._header_color1 = this.paramFromObject(ccfolia_log, 'header_color1', "#000");
     this._header_color2 = this.paramFromObject(ccfolia_log, 'header_color2', "#2E9BB1");
     this._link_color    = this.paramFromObject(ccfolia_log, 'link_color', "#fff");
+    this._divider_color = this.paramFromObject(ccfolia_log, 'divider_color', "#000")
+    this._is_change_default_body_color = this.paramFromObject(ccfolia_log, 'is_change_default_body_color', false)
+    this._default_body_color = this.paramFromObject(ccfolia_log, 'default_body_color', "#333")
     this._title         = this.paramFromObject(ccfolia_log, 'title', '');
     this._tabs          = this.paramFromObject(ccfolia_log, 'tabs', []);
     this._doc           = '';
@@ -83,6 +86,30 @@ export default class CcfoliaLog {
   set link_color(value) { this._link_color = value; }
 
   /**
+   * 区切り文字色
+   * @returns {string}
+   */
+  get divider_color() { return this._divider_color; }
+
+  set divider_color(value) { this._divider_color = value; }
+
+  /**
+   * 本文デフォルト文字色変更フラグ
+   * @returns {boolean}
+   */
+  get is_change_default_body_color() { return this._is_change_default_body_color; }
+
+  set is_change_default_body_color(value) { this._is_change_default_body_color = value; }
+
+  /**
+   * 本文デフォルト文字色
+   * @returns {string}
+   */
+  get default_body_color() { return this._default_body_color; }
+
+  set default_body_color(value) { this._default_body_color = value; }
+
+  /**
    * タイトル
    * @returns {string}
    */
@@ -114,14 +141,19 @@ export default class CcfoliaLog {
     let tab_styles = '';
     if(this.tabs) {
       tab_styles = this.tabs.reduce((result, tab, index) => {
-        result += `
+        if(tab.name != "メイン" && tab.name != '情報' && tab.name == '雑談') {result += `
   .tab${index} {
     background-color: ${tab.background_color};
     border-left:solid 2px ${tab.line_color};
   }
 `
+        }
         return result;
       }, '');
+    }
+    let default_body_color = ''
+    if(this.is_change_default_body_color) {
+      default_body_color = `color: ${this.default_body_color};`;
     }
     return `
 <!DOCTYPE html>
@@ -192,6 +224,7 @@ ${this.rows.map(x => x.format(this.system, this.tabs, selectedOutputTabs, isHide
     padding: 10px 1em 100px;
     padding-bottom: 100px;
     font-size: 14px;
+    background-color: ${this.tabs.find(x => x["name"] == 'メイン')?.background_color ?? '#fff'}
   }
   .main div {
     padding-top: 5px;
@@ -199,8 +232,8 @@ ${this.rows.map(x => x.format(this.system, this.tabs, selectedOutputTabs, isHide
   }
   /* 情報タブ */
   .info {
-    background-color: #fafafa;
-    border-left:solid 2px #bbb;    
+    background-color: ${this.tabs.find(x => x["name"] == '情報')?.background_color ?? '#fafafa'};
+    border-left:solid 2px ${this.tabs.find(x => x["name"] == '情報')?.line_color ?? '#bbb'};    
   }
   /* 雑談タブ */
   .other {
@@ -208,8 +241,8 @@ ${this.rows.map(x => x.format(this.system, this.tabs, selectedOutputTabs, isHide
     margin-left: 50px;
     padding-left: 10px;
     padding-right: 10px;
-    background-color: #f7f7f7;
-    border-left:solid 1px #aaa;
+    background-color: ${this.tabs.find(x => x["name"] == '雑談')?.background_color ?? '#f7f7f7'};
+    border-left:solid 1px ${this.tabs.find(x => x["name"] == '雑談')?.line_color ?? '#aaa'};
   }
   /* 秘話 */
   .secret {
@@ -228,6 +261,7 @@ ${tab_styles}
   .text {
     display: block;
     word-break: break-word;
+    ${default_body_color}
   }
   .day-line {
     height: 1px;
@@ -237,6 +271,7 @@ ${tab_styles}
   }
   .day {
     padding-top: 100px;
+    color: ${this.divider_color}
   }
   @media (min-width: 947px) {
     /* 横幅が947px以上の場合に適用するスタイル */

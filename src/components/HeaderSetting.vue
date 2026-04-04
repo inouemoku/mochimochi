@@ -24,6 +24,14 @@
       <div class="p-2">{{title}}</div>
       <div class="p-2"><span v-for="dividerRow in dividerRows" :key="dividerRow.name">{{dividerRow.name}} </span></div>
     </div>
+    <div class="inline-row">
+      <el-color-picker
+        class="mr-2"
+        v-model="dividerColor"
+        :predefine="predefineColors">
+      </el-color-picker>
+      <div class="small">見出し文字色</div>
+    </div>
   </el-card>
 </template>
 
@@ -46,6 +54,10 @@
         type: String,
         default: ""
       },
+      initialDividerColor: {
+        type: String,
+        default: ""
+      },
       dividerRows: {
         type: Array,
         default: () => []
@@ -56,6 +68,7 @@
         headerColor1: this.initialHeaderColor1,
         headerColor2: this.initialHeaderColor2,
         linkColor: this.initialLinkColor,
+        dividerColor: this.initialDividerColor,
         title: '',
       }
     },
@@ -65,6 +78,7 @@
         this.headerColor1 = val.header_color1;
         this.headerColor2 = val.header_color2;
         this.linkColor = val.link_color;
+        this.dividerColor = val.divider_color;
       },
     },
     watch: {
@@ -77,9 +91,18 @@
       linkColor(val) {
         this.$emit('changeLinkColor', val);
       },
+      dividerColor(val) {
+        this.$emit('changeDividerColor', val);
+      },
       title(val) {
         this.$emit('changeTitle', val);
       }
     }
   }
 </script>
+<style>
+.inline-row {
+  display: flex;
+  align-items: center;
+}
+</style>

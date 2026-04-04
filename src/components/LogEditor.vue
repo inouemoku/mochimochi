@@ -4,7 +4,7 @@
       <span>ログ全文  <el-tooltip
         effect="dark"  placement="top-start">
         <el-button icon="el-icon-question" type="text"></el-button>
-        <div slot="content">+ボタンを押すとログに区切りを追加することができます。ヘッダーにもリンクが追加されます。<br/>行ごと掴んで順序を入れ替えることができます。<br/>磁石ボタンを押すと2回目に押した磁石ボタンまでの間にある同じタブ名の行をまとめることができます。</div>
+        <div slot="content">+ボタンを押すとログに見出しを追加することができます。ヘッダーにもリンクが追加されます。<br/>行ごと掴んで順序を入れ替えることができます。<br/>磁石ボタンを押すと2回目に押した磁石ボタンまでの間にある同じタブ名の行をまとめることができます。</div>
       </el-tooltip>
       </span>
     </div>
@@ -14,7 +14,7 @@
           <el-button size="mini" @click="addRow(index)">+</el-button>
           <el-button size="mini" icon="el-icon-attract" :type="attractButtonType(index)" :disabled="attractFrom && (index < attractFrom)" @click="attract(index)"></el-button>
           <el-button size="mini" @click="removeRowConfirm(index, `[${row.tab_name}] ${row.name}： ${row.body}`)" icon="el-icon-delete" />
-          [{{row.tab_name}}] {{row.name}}： <span v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
+          [{{row.tab_name}}] {{row.name}}： <span :style="bodyStyle" v-html="row.body" /><el-tag  v-show="row.is_secret" size="mini" type="warning">シークレットダイス</el-tag>
         </div>
         <div v-if="row.is_divider">
           <el-row :gutter="5">
@@ -129,11 +129,18 @@
       },
       // 行の背景色
       backgroundColor(tabName) {
-        if(tabName == "メイン" || tabName == 'main') return "#ffffff";
-        if(tabName == "雑談" || tabName == 'other') return "#f7f7f7";
-        if(tabName == "情報" || tabName == 'info') return "#fafafa";
+        if(tabName == "メイン" || tabName == 'main') return this.ccfoliaLog.tabs.find(x => x.name == 'メイン').background_color;
+        if(tabName == "雑談" || tabName == 'other') return  this.ccfoliaLog.tabs.find(x => x.name == '雑談').background_color;
+        if(tabName == "情報" || tabName == 'info') return this.ccfoliaLog.tabs.find(x => x.name == '情報').background_color;
         return this.ccfoliaLog.tabs.find(x => x.name == tabName).background_color;
       },
+    },
+    computed: {
+      bodyStyle() {
+        return this.ccfoliaLog.is_change_default_body_color
+          ? { color: this.ccfoliaLog.default_body_color }
+          : {}
+      }
     },
     watch: {
       initialCcfoliaLog: function(val) {

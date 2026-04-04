@@ -35,7 +35,18 @@ export default {
         body: '1日目',
       });
       const tabs = uniqTabs.reduce((result, x) => {
-        if (x != 'メイン' && x != 'main' && x != '雑談' && x != 'other' && x != '情報' && x != 'info') result.push(this.tabColors(ccfoliaLog.rows, x));
+        if (x == 'メイン' || x == 'main') {
+          result.push({ name: 'メイン', line_color: '#fff', background_color: '#fff' });
+        }
+        else if (x == '雑談' || x == 'other') {
+          result.push({ name: '雑談', line_color: '#bbb', background_color: '#f7f7f7' });
+        }
+        else if (x == '情報' || x == 'info') {
+          result.push({ name: '情報', line_color: '#aaa', background_color: '#fafafa' });
+        }
+        else {
+          result.push(this.tabColors(ccfoliaLog.rows, x));
+        }
         return result;
       }, []);
       ccfoliaLog.rows = [dayLine].concat(ccfoliaLog.rows);
@@ -57,6 +68,13 @@ export default {
       const headerColor = css.find(c => c.key == '#header').contents.background.match(/linear-gradient\((#.*),(#.*)\)/)
       ccfoliaLog.header_color1 = headerColor[1];
       ccfoliaLog.header_color2 = headerColor[2];
+      const dividerColor = css.find(c => c.key == '.day')?.contents?.color ?? "#000";
+      ccfoliaLog.divider_color = dividerColor;
+      const defaultBodyColor = css.find(c => c.key == '.text')?.contents?.color;
+      if(defaultBodyColor) {
+        ccfoliaLog.is_change_default_body_color = true;
+        ccfoliaLog.default_body_color = defaultBodyColor;
+      }
       // RGBを16進数に変換
       const rgbTo16 = function(col) {
         return "#" + col.match(/\d+/g).map(function(a){return ("0" + parseInt(a).toString(16)).slice(-2)}).join("");
@@ -95,18 +113,61 @@ export default {
           }
           return { names, selectedNameTabs };
         }, { names: [], selectedNameTabs: [] });
-      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))].filter(e => e);
-      var index = 0;
+      const order = {
+        メイン: 0,
+        情報: 1,
+        雑談: 2,
+      }
+      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))].filter(e => e).sort((a, b) => (order[a] ?? 99) - (order[b] ?? 99));
+      const getContent = (key) =>
+        css.find(c => c.key === key)?.contents || {}
+      
+      const getLineColor = (content) =>
+        content['border-left']?.match(/.*(#.*)/)?.[1]
+      
+      const getBackgroundColor = (content) =>
+        content['background-color']
+      
+      const tabConfig = {
+        メイン: { key: '.main', defaultLine: '#fff', defaultBackground: "#fff", name: 'メイン' },
+        main:   { key: '.main', defaultLine: '#fff', defaultBackground: "#fff", name: 'メイン' },
+      
+        雑談: { key: '.other', defaultLine: "#888", defaultBackground: "#f7f7f7", name: '雑談' },
+        other:{ key: '.other', defaultLine: "#888", defaultBackground: "#f7f7f7",  name: '雑談' },
+      
+        情報: { key: '.info', defaultLine: "#aaa", defaultBackground: "#fafafa", name: '情報' },
+        info:{ key: '.info', defaultLine: "#aaa", defaultBackground: "#fafafa", name: '情報' },
+      }
+      
+      let index = 0
+      
       const tabs = uniqTabs.reduce((result, x) => {
-        if (x != 'メイン' && x != 'main' && x != '雑談' && x != 'other' && x != '情報' && x != 'info') {
-          const content = css.find(c => c.key == `.tab${index}`).contents;
-          const lineColor = content['border-left'].match(/.*(#.*)/)[1]
-          const backgroundColor = content['background-color']
-          index = index + 1;
-          result.push(this.tabColors(ccfoliaLog.rows, x, lineColor, backgroundColor));
+        const config = tabConfig[x]
+      
+        if (config) {
+          const content = getContent(config.key)
+          const lineColor = getLineColor(content) ?? config.defaultLine
+          const backgroundColor = getBackgroundColor(content) ?? config.defaultBackground
+      
+          result.push({
+            name: config.name,
+            line_color: lineColor,
+            background_color: backgroundColor
+          })
+          return result
         }
-        return result;
-      }, []);
+      
+        // fallback
+        const content = getContent(`.tab${index++}`)
+        const lineColor = getLineColor(content)
+        const backgroundColor = getBackgroundColor(content)
+      
+        result.push(
+          this.tabColors(ccfoliaLog.rows, x, lineColor, backgroundColor)
+        )
+      
+        return result
+      }, [])
       ccfoliaLog.tabs = tabs;
       return { ccfoliaLog, names, selectedNameTabs, uniqTabs }
     },
