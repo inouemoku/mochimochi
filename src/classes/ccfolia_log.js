@@ -135,14 +135,13 @@ export default class CcfoliaLog {
 
 
   format(selectedOutputTabs, isHideSecretDice) {
-    console.log(this.title)
     const dividers = this.rows.filter(x => x.is_divider);
     const menu_array = dividers.map((x) => `      <a href="#key${x.key}">${x.name}</a>`).join("\n");
     let tab_styles = '';
     if(this.tabs) {
-      tab_styles = this.tabs.reduce((result, tab, index) => {
-        if(tab.name != "メイン" && tab.name != '情報' && tab.name == '雑談') {result += `
-  .tab${index} {
+      tab_styles = this.tabs.reduce((result, tab) => {
+        if(tab.name != "メイン" && tab.name != '情報' && tab.name != '雑談') {result += `
+  .${tab.key} {
     background-color: ${tab.background_color};
     border-left:solid 2px ${tab.line_color};
   }

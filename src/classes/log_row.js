@@ -89,7 +89,7 @@ export default class LogRow {
     if(this.tab_name == '雑談' || this.tab_name == 'other') return 'other';
     if(this.tab_name == '情報' || this.tab_name == 'info') return 'info';
     console.log(tabs)
-    return `secret tab${tabs.findIndex(x => x.name == this.tab_name)}`
+    return `secret ${tabs.find(x => x.name == this.tab_name).key}`
   }
   
   /**

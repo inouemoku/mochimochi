@@ -27,25 +27,33 @@ export default {
           }
           return { names, selectedNameTabs };
         }, { names: [], selectedNameTabs: [] });
-      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))];
+      const order = {
+        メイン: 0,
+        情報: 1,
+        雑談: 2,
+      }
+      const uniqTabs = [...new Set(ccfoliaLog.rows.map(x => x.replaced_tab_name))].filter(e => e).sort((a, b) => (order[a] ?? 99) - (order[b] ?? 99));
       const dayLine = LogRow.fromObject({
         key: 0,
         is_divider: true,
         name: '1',
         body: '1日目',
       });
+      let index = 0;
       const tabs = uniqTabs.reduce((result, x) => {
         if (x == 'メイン' || x == 'main') {
-          result.push({ name: 'メイン', line_color: '#fff', background_color: '#fff' });
+          result.push({ key: 'main', name: 'メイン', line_color: '#fff', background_color: '#fff' });
         }
         else if (x == '雑談' || x == 'other') {
-          result.push({ name: '雑談', line_color: '#bbb', background_color: '#f7f7f7' });
+          result.push({ key: 'other', name: '雑談', line_color: '#bbb', background_color: '#f7f7f7' });
         }
         else if (x == '情報' || x == 'info') {
-          result.push({ name: '情報', line_color: '#aaa', background_color: '#fafafa' });
+          result.push({ key: 'info', name: '情報', line_color: '#aaa', background_color: '#fafafa' });
         }
         else {
-          result.push(this.tabColors(ccfoliaLog.rows, x));
+          index = index + 1;
+          const key = `tab${index}`;
+          result.push(this.tabColors(ccfoliaLog.rows, x, null, null, key));
         }
         return result;
       }, []);
@@ -150,6 +158,7 @@ export default {
           const backgroundColor = getBackgroundColor(content) ?? config.defaultBackground
       
           result.push({
+            key: config.key,
             name: config.name,
             line_color: lineColor,
             background_color: backgroundColor
@@ -158,12 +167,13 @@ export default {
         }
       
         // fallback
-        const content = getContent(`.tab${index++}`)
+        const key = `.tab${index++}`;
+        const content = getContent(`.tab${index}`)
         const lineColor = getLineColor(content)
         const backgroundColor = getBackgroundColor(content)
       
         result.push(
-          this.tabColors(ccfoliaLog.rows, x, lineColor, backgroundColor)
+          this.tabColors(ccfoliaLog.rows, x, lineColor, backgroundColor, key.replace('.', ''))
         )
       
         return result
@@ -228,14 +238,14 @@ export default {
       return resultObject;
     },
     // タブの色を決める
-    tabColors(rows, name, lineColor = null, backgroundColor = null) {
+    tabColors(rows, name, lineColor = null, backgroundColor = null, key = 'tab0') {
       if(lineColor != null && backgroundColor != null) {
         return { name, line_color: lineColor, background_color: backgroundColor };
       }
       // KP, GM, DLを含む発言者は判定に使用しない
       const filteredRows = rows.filter(x => !x.is_divider && x.tab_name === name && x.color !== '#222222' && x.color !== '#888888' && !x.name.match(/GM|KP|DL/));
       if (filteredRows.length === 0) {
-        return { name, line_color: '#aaa', background_color: '#f7f7f7' };
+        return { name, line_color: '#aaa', background_color: '#f7f7f7', key };
       }
       const uniqueRow = filteredRows.reduce((acc, cur) => {
         if (!acc || acc.color === cur.color) {
@@ -243,7 +253,7 @@ export default {
         }
         return acc;
       }, null);
-      return { name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05) };
+      return { name, line_color: uniqueRow.color, background_color: this.convertToPaleColorSharp(uniqueRow.color, 0.05), key };
     },
     compositeColor(code, alpha) {
       const colorCode = parseInt(code, 16) * alpha + 255 * (1 - alpha);
